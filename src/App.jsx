@@ -20,7 +20,9 @@ function App() {
   const [userAnswer, setUserAnswer] = React.useState("");
 
   React.useEffect(() => {
-    fetch("/n2_grammar_completed.csv")
+    fetch(
+      "https://raw.githubusercontent.com/AlexDreemurr/HappyJPGrammar/assets/n2_grammar_completed.csv"
+    )
       .then((res) => res.text())
       .then((text) => {
         const { data } = Papa.parse(text, {
