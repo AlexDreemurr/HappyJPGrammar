@@ -63,13 +63,14 @@ Error generating stack: `+e.message+`
   align-items: center;
 `,or=Wn.main`
   padding: 0 2rem;
+  max-width: 800px;
 `,sr=Wn.button`
   display: block;
   width: 100%;
   max-width: 400px;
   margin: 0 auto;
 `,cr=Wn.article``,lr=Wn.article`
-  padding: 0 2rem;
+  padding: 0 0.5rem;
 `,ur=Wn.legend`
   /* background-color: hsl(70deg 5% 90%); */
   border: 1px hsl(0 0% 60%) solid;
