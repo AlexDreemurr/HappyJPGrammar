@@ -2,9 +2,11 @@ import React from "react";
 import Papa from "papaparse";
 import { getNewQuizObject } from "./utility";
 import GlobalStyles from "./GlobalStyles";
+import Header from "./components/Header";
 import Button from "./components/Button";
 import Quiz from "./components/Quiz";
 import QuizAnswer from "./components/QuizAnswer";
+import HistoryQuizes from "./components/HistoryQuizes";
 import styled from "styled-components";
 
 function App() {
@@ -17,11 +19,16 @@ function App() {
     form: "",
     meaning: "",
   });
+  const [historyQuizes, setHistoryQuizes] = React.useState(() => {
+    return JSON.parse(window.localStorage.getItem("historyQuizes") ?? "[]");
+  });
   const [isStart, setIsStart] = React.useState(false);
   const [isChecking, setIsChecking] = React.useState(false);
   const [curQuizNum, setCurQuizNum] = React.useState(0);
   const [userAnswer, setUserAnswer] = React.useState("");
+  const [isCheckingHistory, setIsCheckingHistory] = React.useState(false);
 
+  /* 初始加载csv */
   React.useEffect(() => {
     fetch(
       "https://raw.githubusercontent.com/AlexDreemurr/HappyJPGrammar/assets/n2_grammar_completed.csv"
@@ -38,29 +45,47 @@ function App() {
       });
   }, []);
 
+  /* 更新下一道题目 */
   React.useEffect(() => {
     if (curQuizNum == 0) {
       return;
     }
-
-    setQuizObject(getNewQuizObject(grammars));
+    const newQuizObject = getNewQuizObject(grammars);
+    const newHistoryQuizes = [...historyQuizes, newQuizObject];
+    setQuizObject(newQuizObject);
+    setHistoryQuizes(newHistoryQuizes);
+    window.localStorage.setItem(
+      "historyQuizes",
+      JSON.stringify(newHistoryQuizes)
+    );
   }, [curQuizNum]);
 
   return (
     <Root>
+      <Header
+        setIsCheckingHistory={setIsCheckingHistory}
+        isCheckingHistory={isCheckingHistory}
+      />
+      <HelperBox />
       <Main>
-        {!isStart && (
-          <Button
-            onClick={() => {
-              setIsStart(true);
-              setCurQuizNum(1);
-            }}
-          >
-            开始练习！
-          </Button>
+        {isCheckingHistory && <HistoryQuizes historyQuizes={historyQuizes} />}
+        {!isCheckingHistory && !isStart && (
+          <div>
+            <ImgWrapper>
+              <Img src="/HappyJPGrammar/study_nihongo.png" />
+            </ImgWrapper>
+            <Button
+              onClick={() => {
+                setIsStart(true);
+                setCurQuizNum(1);
+              }}
+            >
+              开始练习！
+            </Button>
+          </div>
         )}
 
-        {isStart && !isChecking && (
+        {!isCheckingHistory && isStart && !isChecking && (
           <Quiz
             quizObject={quizObject}
             userAnswer={userAnswer}
@@ -68,7 +93,7 @@ function App() {
             setIsChecking={setIsChecking}
           />
         )}
-        {isChecking && (
+        {!isCheckingHistory && isChecking && (
           <QuizAnswer
             quizObject={quizObject}
             userAnswer={userAnswer}
@@ -77,20 +102,37 @@ function App() {
           />
         )}
       </Main>
+      <HelperBox />
       <GlobalStyles />
     </Root>
   );
 }
 
+const HelperBox = styled.div`
+  flex: 1;
+  width: 100%;
+  &:first-of-type {
+    min-height: 4rem;
+  }
+`;
 const Root = styled.div`
-  height: 100%;
+  position: relative;
+  min-height: 100%;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
 `;
 const Main = styled.main`
-  padding: 0 2rem;
+  padding: 2rem 1.5rem;
   max-width: 800px;
 `;
+const ImgWrapper = styled.div`
+  width: 8rem;
 
+  /* border: 1px black solid; */
+`;
+const Img = styled.img`
+  width: 100%;
+`;
 export default App;

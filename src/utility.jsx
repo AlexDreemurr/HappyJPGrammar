@@ -33,54 +33,6 @@ export function renderQuestion(question) {
   ));
 }
 
-export function renderGrammarWithSpan(str) {
-  // 查找第一个左括号（支持全角 ｛ 和半角 {）
-  let leftIndex = -1;
-  let leftChar = null;
-  for (let i = 0; i < str.length; i++) {
-    const ch = str[i];
-    if (ch === "{" || ch === "｛") {
-      leftIndex = i;
-      leftChar = ch;
-      break;
-    }
-  }
-
-  // 没有左括号，直接返回纯文本段落
-  if (leftIndex === -1) {
-    return <p>{str}</p>;
-  }
-
-  // 确定匹配的右括号类型
-  const expectedRight = leftChar === "{" ? "}" : "｝";
-  let rightIndex = -1;
-  for (let i = leftIndex + 1; i < str.length; i++) {
-    if (str[i] === expectedRight) {
-      rightIndex = i;
-      break;
-    }
-  }
-
-  // 没有找到右括号，返回原文本段落
-  if (rightIndex === -1) {
-    return <p>{str}</p>;
-  }
-
-  // 提取三部分
-  const before = str.slice(0, leftIndex); // 括号前的文本
-  const inside = str.slice(leftIndex + 1, rightIndex); // 括号内的内容（语法点）
-  const after = str.slice(rightIndex + 1); // 括号后的文本
-
-  // 返回 JSX：括号位置用 <span> 替换
-  return (
-    <SentenceWrapper>
-      {before}
-      <Answer>{inside}</Answer>
-      {after}
-    </SentenceWrapper>
-  );
-}
-
 export function getNewQuizObject(grammars) {
   // 生成新题目！
   const itemNum = parseInt(Math.random() * grammars.length);
@@ -99,20 +51,39 @@ export function getNewQuizObject(grammars) {
   };
   return newQuizObject;
 }
+export async function translateJapanese(text) {
+  const response = await fetch("https://api.deepseek.com/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${import.meta.env.VITE_DEEPSEEK_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: "deepseek-chat",
+      messages: [
+        {
+          role: "system",
+          content:
+            "你是一个日文翻译助手。用户会发送日文句子，你只需要回复对应的中文翻译，不要添加任何解释或多余内容。",
+        },
+        {
+          role: "user",
+          content: text,
+        },
+      ],
+      max_tokens: 200,
+    }),
+  });
 
+  if (!response.ok) {
+    throw new Error(`翻译请求失败：${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.choices[0].message.content.trim();
+}
 const Blank = styled.span`
   border: 1px black solid;
   padding: 0px 1.5rem;
   margin: 0 5px;
-`;
-const Answer = styled.span`
-  border: 1px black solid;
-  display: inline-block;
-  text-indent: 0;
-`;
-const SentenceWrapper = styled.p`
-  background-color: hsl(0deg 0% 85%);
-  padding: 1rem 1.5rem;
-  text-indent: 2rem;
-  border-radius: 1rem;
 `;

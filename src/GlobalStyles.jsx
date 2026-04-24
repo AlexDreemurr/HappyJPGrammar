@@ -16,6 +16,7 @@ const GlobalStyles = createGlobalStyle`
     --gray95: hsl(0deg 0% 95%);
     --gray85: hsl(0deg 0% 85%);
     --gray60: hsl(0deg 0% 60%);
+    --gray40: hsl(0deg 0% 40%);
     --gray15: hsl(0deg 0% 15%);
   }
 

@@ -2,7 +2,8 @@ import styled from "styled-components";
 import Button from "./Button";
 import React from "react";
 import { PacmanLoader } from "react-spinners";
-import { translateJapanese } from "../translateJapanese";
+import { translateJapanese } from "../utility";
+
 export default function QuizAnswer({
   quizObject,
   userAnswer,
@@ -35,11 +36,11 @@ export default function QuizAnswer({
   }
   return (
     <AnswerPage>
-      <p>
+      <TypoWrapper>
         {userAnswer === quizObject.answer ? "回答正确！" : "好像有点不太对..."}
-      </p>
+      </TypoWrapper>
       {/* 渲染原题目及答案 */}
-      {renderGrammarWithSpan(quizObject.rawSentence)}
+      <RenderGrammarWithSpan str={quizObject.rawSentence} />
       {needTranslate && isLoading && (
         <TranslateWrapper
           style={{
@@ -49,15 +50,15 @@ export default function QuizAnswer({
           }}
         >
           <PacmanLoader color="hsl(0deg 0% 95%)" />
-          <p style={{ margin: 0 }}>翻译中</p>
+          <TypoWrapper style={{ margin: 0 }}>翻译中</TypoWrapper>
         </TranslateWrapper>
       )}
       {needTranslate && !isLoading && (
         <TranslateWrapper>{translateError ?? translatedText}</TranslateWrapper>
       )}
-      <p>
+      <TypoWrapper>
         <Grammar>{quizObject.form}</Grammar>的含义：{quizObject.meaning}
-      </p>
+      </TypoWrapper>
       <ButtonWrapper>
         <Button onClick={handleTranslate}>获得翻译</Button>
         <Button
@@ -76,7 +77,7 @@ const AnswerPage = styled.article`
   padding: 0 0.5rem;
 `;
 
-export function renderGrammarWithSpan(str) {
+export function RenderGrammarWithSpan({ str }) {
   // 查找第一个左括号（支持全角 ｛ 和半角 {）
   let leftIndex = -1;
   let leftChar = null;
@@ -129,7 +130,7 @@ const Answer = styled.span`
   display: inline-block;
   text-indent: 0;
 `;
-const SentenceWrapper = styled.p`
+const SentenceWrapper = styled.div`
   background-color: var(--gray85);
   padding: 1rem 1.5rem;
   margin: 0;
@@ -151,11 +152,12 @@ const ButtonWrapper = styled.div`
 const Grammar = styled.span`
   font-family: "BIZ UDMincho";
   display: inline-block;
-  /* border: 1px black solid; */
+  text-indent: 0;
   margin-right: 1px;
 `;
-const LoadingWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
+const TypoWrapper = styled.p`
+  padding-left: 1.5rem;
+  /* text-indent: 2rem; */
+  margin: 0;
+  margin-bottom: 0.5rem;
 `;
