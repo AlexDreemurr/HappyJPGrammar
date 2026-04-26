@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 export function splitSentence(sentence) {
   const inners = [];
-  const replaced = sentence.replace(/｛([^｛｝]*)｝/g, (_, inner) => {
+  const replaced = sentence.replace(/[{｛]([^{｛}｝]*)[}｝]/g, (_, inner) => {
     inners.push(inner);
     return "@";
   });
@@ -42,6 +42,7 @@ export function getNewQuizObject(grammars) {
   const placeholders = randomPicker(grammars, 3).map((d) => d.form);
 
   const newQuizObject = {
+    id: Math.random(),
     rawSentence: rawSentence,
     question: sentence,
     choices: shuffle([answer, ...placeholders]),
@@ -51,7 +52,28 @@ export function getNewQuizObject(grammars) {
   };
   return newQuizObject;
 }
-export async function translateJapanese(text) {
+export async function fetchSharedDictQuiz(supabase) {
+  // 访问supabase共享数据库并生成一道随机题目
+  const vocab = await getRandomVocab(supabase);
+  const otherChoices = await getRandomWords(3, vocab.word, supabase);
+  const rawSentence = vocab.sentences[parseInt(Math.random() * 4)];
+  const [sentence, answer] = splitSentence(rawSentence);
+
+  return {
+    id: Math.random(),
+    rawSentence,
+    question: sentence,
+    choices: shuffle([
+      extractBrackets(rawSentence),
+      ...otherChoices.map((v) => v.word),
+    ]),
+    answer,
+    form: vocab.word,
+    meaning: vocab.meaning,
+    reading: vocab.reading,
+  };
+}
+export async function deepseekAPI(text, prompt) {
   const response = await fetch("https://api.deepseek.com/chat/completions", {
     method: "POST",
     headers: {
@@ -63,15 +85,14 @@ export async function translateJapanese(text) {
       messages: [
         {
           role: "system",
-          content:
-            "你是一个日文翻译助手。用户会发送日文句子，你只需要回复对应的中文翻译，不要添加任何解释或多余内容。",
+          content: prompt,
         },
         {
           role: "user",
           content: text,
         },
       ],
-      max_tokens: 200,
+      max_tokens: 2000,
     }),
   });
 
@@ -82,6 +103,59 @@ export async function translateJapanese(text) {
   const data = await response.json();
   return data.choices[0].message.content.trim();
 }
+
+export async function getRandomVocab(supabase) {
+  // 先查总数
+  const { count } = await supabase
+    .from("vocabulary")
+    .select("*", { count: "exact", head: true });
+  // 随机偏移
+  const randomOffset = Math.floor(Math.random() * count);
+  // 取那一条
+  const { data, error } = await supabase
+    .from("vocabulary")
+    .select("*")
+    .range(randomOffset, randomOffset)
+    .single();
+  if (error) {
+    console.error(error.message);
+    return null;
+  }
+  return data;
+}
+export async function getRandomWords(count = 3, avoid_word = "", supabase) {
+  const { count: total } = await supabase
+    .from("vocabulary")
+    .select("*", { count: "exact", head: true });
+
+  const results = [];
+  const usedWords = new Set();
+  if (avoid_word) usedWords.add(avoid_word); // 提前加入黑名单
+
+  let attempts = 0;
+  while (results.length < count && attempts < count * 5) {
+    attempts++;
+    const offset = Math.floor(Math.random() * total);
+    const { data } = await supabase
+      .from("vocabulary")
+      .select("word")
+      .range(offset, offset)
+      .single();
+
+    if (data && !usedWords.has(data.word)) {
+      usedWords.add(data.word);
+      results.push(data);
+    }
+  }
+
+  return results;
+}
+
+export function extractBrackets(str) {
+  const match = str.match(/\{(.+?)\}/);
+  return match ? match[1] : null;
+}
+
 const Blank = styled.span`
   border: 1px black solid;
   padding: 0px 1.5rem;

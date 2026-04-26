@@ -5,7 +5,10 @@ export default function HistoryQuizes({ historyQuizes }) {
   return (
     <Wrapper>
       {historyQuizes.map((quizObject) => (
-        <RenderGrammarWithSpan str={quizObject.rawSentence} />
+        <RenderGrammarWithSpan
+          key={quizObject.id}
+          str={quizObject.rawSentence}
+        />
       ))}
     </Wrapper>
   );

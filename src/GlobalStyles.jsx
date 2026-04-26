@@ -15,9 +15,15 @@ const GlobalStyles = createGlobalStyle`
     font-family: "Noto Serif SC", serif;
     --gray95: hsl(0deg 0% 95%);
     --gray85: hsl(0deg 0% 85%);
+    --gray75: hsl(0deg 0% 75%);
     --gray60: hsl(0deg 0% 60%);
     --gray40: hsl(0deg 0% 40%);
+    --gray25: hsl(0deg 0% 25%);
     --gray15: hsl(0deg 0% 15%);
+    --green85: hsl(150deg 20% 85%);
+    --green15: hsl(150deg 20% 15%);
+    --red85: hsl(0deg 20% 85%);
+    --red15: hsl(0deg 20% 15%);
   }
 
   body {

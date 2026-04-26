@@ -1,20 +1,21 @@
 import React from "react";
 import styled from "styled-components";
-export default function Header({ setIsCheckingHistory, isCheckingHistory }) {
+import LinkWrapper from "./LinkWrapper";
+
+export default function Header() {
   return (
     <Wrapper>
-      <TitleDesktop>
+      <TitleDesktop to="/">
         尹の日本語
         <span style={{ letterSpacing: -3 }}>オンラインプラットフォーム</span>
       </TitleDesktop>
-      <TitleMobile>
+      <TitleMobile to="/">
         尹の日本語
         <span style={{ letterSpacing: 1 }}>Platform</span>
       </TitleMobile>
 
-      <Button onClick={() => setIsCheckingHistory(!isCheckingHistory)}>
-        {!!isCheckingHistory ? "返回" : "练习历史"}
-      </Button>
+      <LinkWrapper to="/contribute">加题</LinkWrapper>
+      <LinkWrapper to="/history">历史</LinkWrapper>
     </Wrapper>
   );
 }
@@ -27,37 +28,28 @@ const Wrapper = styled.header`
   position: fixed;
   top: 0;
   display: flex;
-  justify-content: space-between;
+  gap: 1rem;
+  align-items: baseline;
   padding: 0 1.5rem;
-  /* flex-shrink: 0; */
 `;
 
-const TitleDesktop = styled.p`
+const TitleDesktop = styled(LinkWrapper)`
+  font-size: 1.3rem;
+  color: var(--gray85);
+  text-decoration: none;
   letter-spacing: -0.5;
   font-family: Hina Mincho;
-  margin: 1rem 0;
+  margin: 0.9rem 0;
+  margin-right: auto;
 
-  @media (max-width: 550px) {
+  @media (max-width: 600px) {
     display: none;
   }
 `;
 const TitleMobile = styled(TitleDesktop)`
   display: none;
 
-  @media (max-width: 550px) {
+  @media (max-width: 600px) {
     display: revert;
-  }
-`;
-const Button = styled.button`
-  color: inherit;
-  background-color: inherit;
-  border: none;
-  text-decoration: underline;
-  cursor: pointer;
-  /* &:hover {
-    color: var(--gray60);
-  } */
-  &:active {
-    color: var(--gray40);
   }
 `;

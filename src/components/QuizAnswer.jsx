@@ -2,13 +2,14 @@ import styled from "styled-components";
 import Button from "./Button";
 import React from "react";
 import { PacmanLoader } from "react-spinners";
-import { translateJapanese } from "../utility";
+import { deepseekAPI } from "../utility";
 
 export default function QuizAnswer({
   quizObject,
   userAnswer,
   setIsChecking,
   setCurQuizNum,
+  setStatus,
 }) {
   /* 
      quizObject:     题目对象
@@ -26,7 +27,10 @@ export default function QuizAnswer({
     setIsLoading(true);
     setTranslateError(null);
     try {
-      const result = await translateJapanese(quizObject.rawSentence);
+      const result = await deepseekAPI(
+        quizObject.rawSentence,
+        "你是一个日文翻译助手。用户会发送日文句子，你只需要回复对应的中文翻译，不要添加任何解释或多余内容。"
+      );
       setTranslatedText(result);
     } catch (err) {
       setTranslateError("翻译失败，请重试");
@@ -40,7 +44,10 @@ export default function QuizAnswer({
         {userAnswer === quizObject.answer ? "回答正确！" : "好像有点不太对..."}
       </TypoWrapper>
       {/* 渲染原题目及答案 */}
-      <RenderGrammarWithSpan str={quizObject.rawSentence} />
+      <RenderGrammarWithSpan
+        str={quizObject.rawSentence}
+        katakana={quizObject.reading}
+      />
       {needTranslate && isLoading && (
         <TranslateWrapper
           style={{
@@ -57,7 +64,11 @@ export default function QuizAnswer({
         <TranslateWrapper>{translateError ?? translatedText}</TranslateWrapper>
       )}
       <TypoWrapper>
-        <Grammar>{quizObject.form}</Grammar>的含义：{quizObject.meaning}
+        <Grammar>
+          {quizObject.form}
+          {!!quizObject.reading && `(${quizObject.reading})`}
+        </Grammar>
+        的含义：{quizObject.meaning}
       </TypoWrapper>
       <ButtonWrapper>
         <Button onClick={handleTranslate}>获得翻译</Button>
@@ -65,6 +76,7 @@ export default function QuizAnswer({
           onClick={() => {
             setIsChecking(false);
             setCurQuizNum((d) => d + 1);
+            setStatus("busy");
           }}
         >
           继续:D
@@ -77,7 +89,7 @@ const AnswerPage = styled.article`
   padding: 0 0.5rem;
 `;
 
-export function RenderGrammarWithSpan({ str }) {
+export function RenderGrammarWithSpan({ str, katakana = "" }) {
   // 查找第一个左括号（支持全角 ｛ 和半角 {）
   let leftIndex = -1;
   let leftChar = null;
@@ -119,14 +131,21 @@ export function RenderGrammarWithSpan({ str }) {
   return (
     <SentenceWrapper>
       {before}
-      <Answer>{inside}</Answer>
+      <Answer>
+        {/* <Katakana>{katakana}</Katakana> */}
+        {inside}
+      </Answer>
       {after}
     </SentenceWrapper>
   );
 }
 
 const Answer = styled.span`
-  border: 1px black solid;
+  background-color: var(--gray15);
+  color: var(--gray85);
+  border-radius: 0.5rem;
+  padding: 0rem 0.4rem 0rem 0.4rem;
+  /* border: 1px black solid; */
   display: inline-block;
   text-indent: 0;
 `;
