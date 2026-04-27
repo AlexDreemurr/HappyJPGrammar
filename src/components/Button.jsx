@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 const STYLE = {
-  unstyled: {
+  default: {
     "--backgroundColor": "var(--gray85)",
     "--hoverColor": "hsl(0deg 0% 75%)",
     "--color": "black",
@@ -17,9 +17,9 @@ const STYLE = {
     "--color": "var(--gray95)",
   },
 };
-export default function Button({ type = "unstyled", children, ...delegated }) {
+export default function Button({ type = "default", children, ...delegated }) {
   /* type: 
-        unstyled | success | info 
+        default | success | info 
   */
 
   return (

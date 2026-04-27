@@ -1,14 +1,14 @@
 import styled from "styled-components";
 import React from "react";
-import { RenderGrammarWithSpan } from "./QuizAnswer";
+import SentenceBox from "./SentenceBox";
+
 export default function HistoryQuizes({ historyQuizes }) {
   return (
     <Wrapper>
       {historyQuizes.map((quizObject) => (
-        <RenderGrammarWithSpan
-          key={quizObject.id}
-          str={quizObject.rawSentence}
-        />
+        <SentenceBox type="sentence" key={quizObject.id}>
+          {quizObject.rawSentence}
+        </SentenceBox>
       ))}
     </Wrapper>
   );

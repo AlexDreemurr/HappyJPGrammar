@@ -1,5 +1,5 @@
 import { getNewQuizObject, fetchSharedDictQuiz } from "../../utility";
-import Quiz from "../Quiz";
+import SingleSelect from "../SingleSelect";
 import QuizAnswer from "../QuizAnswer";
 import Papa from "papaparse";
 import React from "react";
@@ -87,11 +87,11 @@ function QuizPage({ source, historyQuizes, setHistoryQuizes }) {
     <Main>
       {status === "busy" && <HashLoader />}
       {status !== "busy" && !isChecking && (
-        <Quiz
-          quizObject={quizObject}
+        <SingleSelect
+          source={quizObject}
           userAnswer={userAnswer}
           setUserAnswer={setUserAnswer}
-          setIsChecking={setIsChecking}
+          setIsSubmit={setIsChecking}
         />
       )}
       {status !== "busy" && isChecking && (

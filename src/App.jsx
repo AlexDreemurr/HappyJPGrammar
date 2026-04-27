@@ -9,7 +9,6 @@ import HistoryPage from "./components/pageComponents/HistoryPage";
 
 /* Components */
 import Header from "./components/Header";
-import Button from "./components/Button";
 import styled from "styled-components";
 import ContributeForm from "./components/ContributeForm";
 

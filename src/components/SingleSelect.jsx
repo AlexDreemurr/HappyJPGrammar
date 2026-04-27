@@ -1,45 +1,54 @@
 import Button from "./Button";
+import React from "react";
 import styled from "styled-components";
 import { renderQuestion } from "../utility";
 
-export default function Quiz({
-  quizObject,
+export default function SingleSelect({
+  source,
   userAnswer,
   setUserAnswer,
-  setIsChecking,
+  setIsSubmit,
 }) {
   /* 
-     quizObject:     题目对象
+     source:     资源对象
+      { question: 'balabala@bala', 
+        choices: ['asd', 'efw', 'wef', 'ewg']
+      }
+      其中question中可插入@字符，会被替代为问号框
+
      userAnswer:     用户答案state
-     setUserAnswer:  用户答案state setter
-     setIsChecking:  进入答案页state setter
+     setUserAnswer:  用户答案state setter    -> 对应的choice值
+     setIsSubmit:    用户是否提交state setter -> true
   */
+  const QuizId = React.useId();
+
   return (
     <Article>
       <Fieldset>
-        <Legend>{renderQuestion(quizObject.question)}</Legend>
+        <Legend>{renderQuestion(source.question)}</Legend>
         <OptionGroup>
-          {quizObject.choices.map((choice, index) => (
-            <SingleOption key={choice}>
+          {source.choices.map((choice, index) => (
+            <SingleOption key={index}>
               <input
                 type="radio"
-                id={`choice${index + 1}`}
-                name="grammar-question"
+                id={`${QuizId}-choice${index + 1}`}
+                name={QuizId}
                 value={choice}
                 checked={userAnswer === choice}
                 onChange={(event) => {
                   setUserAnswer(event.target.value);
                 }}
               />
-              <Label htmlFor={`choice${index + 1}`}>{choice}</Label>
+              <Label htmlFor={`${QuizId}-choice${index + 1}`}>{choice}</Label>
             </SingleOption>
           ))}
         </OptionGroup>
       </Fieldset>
       <Button
         onClick={() => {
-          setIsChecking(true);
+          setIsSubmit(true);
         }}
+        disabled={!userAnswer}
       >
         提交
       </Button>

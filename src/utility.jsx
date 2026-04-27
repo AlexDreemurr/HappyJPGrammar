@@ -156,6 +156,47 @@ export function extractBrackets(str) {
   return match ? match[1] : null;
 }
 
+export function getThreeParts(str) {
+  // 查找第一个左括号（支持全角 ｛ 和半角 {）
+  let leftIndex = -1;
+  let leftChar = null;
+  for (let i = 0; i < str.length; i++) {
+    const ch = str[i];
+    if (ch === "{" || ch === "｛") {
+      leftIndex = i;
+      leftChar = ch;
+      break;
+    }
+  }
+
+  // 没有左括号，直接返回纯文本段落
+  if (leftIndex === -1) {
+    return <p>{str}</p>;
+  }
+
+  // 确定匹配的右括号类型
+  const expectedRight = leftChar === "{" ? "}" : "｝";
+  let rightIndex = -1;
+  for (let i = leftIndex + 1; i < str.length; i++) {
+    if (str[i] === expectedRight) {
+      rightIndex = i;
+      break;
+    }
+  }
+
+  // 没有找到右括号，返回原文本段落
+  if (rightIndex === -1) {
+    return <p>{str}</p>;
+  }
+
+  // 提取三部分
+  const before = str.slice(0, leftIndex); // 括号前的文本
+  const inside = str.slice(leftIndex + 1, rightIndex); // 括号内的内容（语法点）
+  const after = str.slice(rightIndex + 1); // 括号后的文本
+
+  return { before, inside, after };
+}
+
 const Blank = styled.span`
   border: 1px black solid;
   padding: 0px 1.5rem;
