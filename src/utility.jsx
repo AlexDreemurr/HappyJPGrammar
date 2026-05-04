@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { getStoredSharedDictSetIds } from "./sharedDictSettings";
 
 export function splitSentence(sentence) {
   const inners = [];
@@ -54,8 +55,9 @@ export function getNewQuizObject(grammars) {
 }
 export async function fetchSharedDictQuiz(supabase) {
   // 访问supabase共享数据库并生成一道随机题目
-  const vocab = await getRandomVocab(supabase);
-  const otherChoices = await getRandomWords(3, vocab.word, supabase);
+  const phraseSetIds = getStoredSharedDictSetIds();
+  const vocab = await getRandomVocab(supabase, phraseSetIds);
+  const otherChoices = await getRandomWords(3, vocab.word, supabase, phraseSetIds);
   const rawSentence = vocab.sentences[parseInt(Math.random() * 4)];
   const [sentence, answer] = splitSentence(rawSentence);
 
@@ -104,17 +106,27 @@ export async function deepseekAPI(text, prompt) {
   return data.choices[0].message.content.trim();
 }
 
-export async function getRandomVocab(supabase) {
+function applyPhraseSetFilter(query, phraseSetIds) {
+  if (Array.isArray(phraseSetIds) && phraseSetIds.length > 0) {
+    return query.in("set_id", phraseSetIds);
+  }
+
+  return query;
+}
+
+export async function getRandomVocab(supabase, phraseSetIds = null) {
   // 先查总数
-  const { count } = await supabase
-    .from("vocabulary")
-    .select("*", { count: "exact", head: true });
+  const { count } = await applyPhraseSetFilter(
+    supabase.from("vocabulary").select("*", { count: "exact", head: true }),
+    phraseSetIds
+  );
   // 随机偏移
   const randomOffset = Math.floor(Math.random() * count);
   // 取那一条
-  const { data, error } = await supabase
-    .from("vocabulary")
-    .select("*")
+  const { data, error } = await applyPhraseSetFilter(
+    supabase.from("vocabulary").select("*"),
+    phraseSetIds
+  )
     .range(randomOffset, randomOffset)
     .single();
   if (error) {
@@ -123,10 +135,16 @@ export async function getRandomVocab(supabase) {
   }
   return data;
 }
-export async function getRandomWords(count = 3, avoid_word = "", supabase) {
-  const { count: total } = await supabase
-    .from("vocabulary")
-    .select("*", { count: "exact", head: true });
+export async function getRandomWords(
+  count = 3,
+  avoid_word = "",
+  supabase,
+  phraseSetIds = null
+) {
+  const { count: total } = await applyPhraseSetFilter(
+    supabase.from("vocabulary").select("*", { count: "exact", head: true }),
+    phraseSetIds
+  );
 
   const results = [];
   const usedWords = new Set();
@@ -136,9 +154,10 @@ export async function getRandomWords(count = 3, avoid_word = "", supabase) {
   while (results.length < count && attempts < count * 5) {
     attempts++;
     const offset = Math.floor(Math.random() * total);
-    const { data } = await supabase
-      .from("vocabulary")
-      .select("word")
+    const { data } = await applyPhraseSetFilter(
+      supabase.from("vocabulary").select("word"),
+      phraseSetIds
+    )
       .range(offset, offset)
       .single();
 
@@ -197,6 +216,22 @@ export function getThreeParts(str) {
   return { before, inside, after };
 }
 
+// 将世界时间戳诸如
+// 2026-04-25T08:36:51.511087+00:00
+// 转化成中国大陆时间，并以 26/04/25 这样的格式输出
+export function formatToChinaTime(isoString) {
+  const date = new Date(isoString);
+
+  const chinaDate = new Date(
+    date.toLocaleString("en-US", { timeZone: "Asia/Shanghai" })
+  );
+
+  const year = String(chinaDate.getFullYear()).slice(2);
+  const month = String(chinaDate.getMonth() + 1).padStart(2, "0");
+  const day = String(chinaDate.getDate()).padStart(2, "0");
+
+  return `${year}/${month}/${day}`;
+}
 const Blank = styled.span`
   border: 1px black solid;
   padding: 0px 1.5rem;

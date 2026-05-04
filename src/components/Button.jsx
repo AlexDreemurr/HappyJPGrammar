@@ -17,20 +17,27 @@ const STYLE = {
     "--color": "var(--gray95)",
   },
 };
-export default function Button({ type = "default", children, ...delegated }) {
+export default function Button({
+  as = "",
+  type = "default",
+  children,
+  ...delegated
+}) {
   /* type: 
         default | success | info 
   */
 
   return (
-    <Wrapper style={STYLE[type]} {...delegated}>
+    <Wrapper as={as || "button"} style={STYLE[type]} {...delegated}>
       {children}
     </Wrapper>
   );
 }
 
 const Wrapper = styled.button`
-  display: block;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
   max-width: 400px;
   margin: 0 auto;

@@ -20,6 +20,8 @@ const GlobalStyles = createGlobalStyle`
     --gray40: hsl(0deg 0% 40%);
     --gray25: hsl(0deg 0% 25%);
     --gray15: hsl(0deg 0% 15%);
+
+    --transparentGray15: hsl(0deg 0% 15% / 0.5);
     --green85: hsl(150deg 20% 85%);
     --green15: hsl(150deg 20% 15%);
     --red85: hsl(0deg 20% 85%);
@@ -30,13 +32,17 @@ const GlobalStyles = createGlobalStyle`
     background-color: var(--gray95);
     margin: 0;
   }
-
   html, body {
     height: 100%;
   }
 
   #root {
     height: 100%;
+  }
+
+  h1, h2, h3, h4, h5, h6, p{
+    margin: 0;
+    padding: 0;
   }
 `;
 

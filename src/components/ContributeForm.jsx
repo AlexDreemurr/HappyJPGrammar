@@ -4,6 +4,8 @@ import supabase from "../supabaseClient";
 import { deepseekAPI } from "../utility";
 import Message from "./Message";
 import { PacmanLoader } from "react-spinners";
+import Select from "./Select";
+import usePhraseSets from "../hooks/usePhraseSets";
 
 function ContributeForm() {
   const wordInputId = React.useId();
@@ -12,6 +14,14 @@ function ContributeForm() {
   const [contributor, setContributor] = React.useState("");
   const [status, setStatus] = React.useState("free");
   const [errorMsg, setErrorMsg] = React.useState("");
+
+  const { phraseSets, phraseSetsStatus } = usePhraseSets();
+  const [selectedPhraseSet, setSelectedPhraseSet] = React.useState(null);
+  React.useEffect(() => {
+    if (phraseSets.length > 0) {
+      setSelectedPhraseSet(phraseSets[0].id);
+    }
+  }, [phraseSets]);
 
   async function WordImplement() {
     setStatus("busy");
@@ -37,13 +47,14 @@ function ContributeForm() {
     }
 
     const result = await deepseekAPI(
-      `单词：${word}，贡献者：${contributor}`,
+      `单词：${word}，贡献者：${contributor},set_id：${selectedPhraseSet}`,
       `你是一个日语词典助手。用户会给你一个日语单词和贡献者名字。
       首先判断输入是否是一个真实存在的日语单词。如果不是，只返回：{"valid": false}
       如果是，返回以下格式的JSON对象，不要有任何多余的文字和markdown格式，只返回纯JSON。
         要求：
         1. sentences数组包含４个例文（字符串），例文中需要包含word或者word的变形。每个例文长度必须在80字到150字之间，难度逐渐递增（从N4到N2）。句子需要有真实情景。
         2. 每个句子中把该单词的活用形用大括号括起来，例如：「彼は約束を{改めた}。」
+        3. set_id是一个int型整数
 
         格式如下：
         {
@@ -55,7 +66,8 @@ function ContributeForm() {
           "contributor_name": "贡献者名字",
           "sentences": [
               "sentence1"， "sentence2", "sentence3", "sentence4"
-          ]
+          ],
+          "set_id": 12
         }`
     );
 
@@ -126,8 +138,34 @@ function ContributeForm() {
           disabled={status === "busy"}
         />
       </RowWrapper>
+      {selectedPhraseSet !== null && phraseSets.length > 0 && (
+        <RowWrapper>
+          <label htmlFor="phraseSetSelect">词汇集</label>
+          <Select
+            id="phraseSetSelect"
+            value={selectedPhraseSet}
+            onChange={(event) =>
+              setSelectedPhraseSet(Number(event.target.value))
+            }
+          >
+            {phraseSets.map((phraseSet) => (
+              <option key={phraseSet.id} value={phraseSet.id}>
+                {phraseSet.name}
+              </option>
+            ))}
+          </Select>
+        </RowWrapper>
+      )}
 
-      <button disabled={status === "busy"}>提交</button>
+      <button
+        disabled={
+          status === "busy" ||
+          selectedPhraseSet === null ||
+          phraseSets.length <= 0
+        }
+      >
+        提交
+      </button>
     </Wrapper>
   );
 }

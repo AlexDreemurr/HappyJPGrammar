@@ -13,5 +13,7 @@ function HistoryPage({ historyQuizes }) {
 const Main = styled.main`
   padding: 2rem 1.5rem;
   max-width: 800px;
+
+  height: 100%;
 `;
 export default HistoryPage;

@@ -13,5 +13,7 @@ export default function HistoryQuizes({ historyQuizes }) {
     </Wrapper>
   );
 }
-const Wrapper = styled.div``;
+const Wrapper = styled.div`
+  height: 100%;
+`;
 const QuizCard = styled.div``;

@@ -6,6 +6,8 @@ import GlobalStyles from "./GlobalStyles";
 import QuizPage from "./components/pageComponents/QuizPage";
 import StartPage from "./components/pageComponents/StartPage";
 import HistoryPage from "./components/pageComponents/HistoryPage";
+import PhraseSetPage from "./components/pageComponents/PhraseSetPage";
+import SettingsPage from "./components/pageComponents/SettingsPage";
 
 /* Components */
 import Header from "./components/Header";
@@ -48,6 +50,9 @@ function App() {
             element={<HistoryPage historyQuizes={historyQuizes} />}
           />
           <Route path="/contribute" element={<ContributeForm />} />
+          <Route path="/phraseSetList" element={<PhraseSetPage />} />
+          <Route path="/phraseSet/:phraseSetId" element={<PhraseSetPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
         </Routes>
         <HelperBox />
       </Root>
@@ -60,9 +65,7 @@ function App() {
 const HelperBox = styled.div`
   flex: 1;
   width: 100%;
-  &:first-of-type {
-    min-height: 4rem;
-  }
+  min-height: 4rem;
 `;
 const Root = styled.div`
   position: relative;

@@ -3,24 +3,36 @@ import styled from "styled-components";
 import LinkWrapper from "../LinkWrapper";
 import Button from "../Button";
 
+// Temporary Code for testing
+import PhraseSetList from "../PhraseSetList";
+
 function StartPage() {
   return (
-    <div>
+    <Wrapper>
+      {/* <PhraseSetList /> */}
       <ImgWrapper>
         <Img src="/HappyJPGrammar/study_nihongo.png" />
       </ImgWrapper>
       <LinkGroup>
         <LinkWrapper to="/quiz/grammar" style={{ textDecoration: "none" }}>
-          <Button>原语法练习</Button>
+          <Button as="div">原语法练习</Button>
         </LinkWrapper>
         <LinkWrapper to="/quiz/sharedDict" style={{ textDecoration: "none" }}>
-          <Button>共享词汇练习</Button>
+          <Button as="div">共享词汇练习</Button>
         </LinkWrapper>
       </LinkGroup>
-    </div>
+    </Wrapper>
   );
 }
 
+const Wrapper = styled.div`
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+`;
 const ImgWrapper = styled.div`
   width: 8rem;
 `;
@@ -31,5 +43,7 @@ const LinkGroup = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  width: 100%;
+  max-width: 150px;
 `;
 export default StartPage;
