@@ -3,7 +3,7 @@ import styled from "styled-components";
 import LinkWrapper from "./LinkWrapper";
 import SideMenu from "./SideMenu";
 import { QUERIES } from "../constants";
-
+import { FONT_SIZE } from "../constants";
 export default function Header() {
   return (
     <Wrapper>
@@ -17,10 +17,18 @@ export default function Header() {
       </TitleMobile>
 
       <Nav>
-        <LinkWrapper to="/contribute">加题</LinkWrapper>
-        <LinkWrapper to="/phraseSetList">词汇集</LinkWrapper>
-        <LinkWrapper to="/history">历史</LinkWrapper>
-        <LinkWrapper to="/settings">设置</LinkWrapper>
+        <LinkWrapper fontSize={FONT_SIZE.default} to="/contribute">
+          加词
+        </LinkWrapper>
+        <LinkWrapper fontSize={FONT_SIZE.default} to="/phraseSetList">
+          词汇集
+        </LinkWrapper>
+        <LinkWrapper fontSize={FONT_SIZE.default} to="/history">
+          历史
+        </LinkWrapper>
+        <LinkWrapper fontSize={FONT_SIZE.default} to="/settings">
+          设置
+        </LinkWrapper>
       </Nav>
 
       <MenuWrapper>

@@ -1,7 +1,7 @@
 import React from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import styled from "styled-components";
-import { QUERIES } from "../constants";
+import { FONT_SIZE, QUERIES } from "../constants";
 import UnstyledButton from "./UnstyledButton";
 import Icon from "./Icon";
 import LinkWrapper from "./LinkWrapper";
@@ -25,10 +25,18 @@ function SideMenu() {
 
           <MagicBox />
           <Nav>
-            <LinkWrapper to="/contribute">加题</LinkWrapper>
-            <LinkWrapper to="/phraseSetList">词汇集</LinkWrapper>
-            <LinkWrapper to="/history">历史</LinkWrapper>
-            <LinkWrapper to="/settings">设置</LinkWrapper>
+            <LinkWrapper fontSize={FONT_SIZE.default} to="/contribute">
+              加词
+            </LinkWrapper>
+            <LinkWrapper fontSize={FONT_SIZE.default} to="/phraseSetList">
+              词汇集
+            </LinkWrapper>
+            <LinkWrapper fontSize={FONT_SIZE.default} to="/history">
+              历史
+            </LinkWrapper>
+            <LinkWrapper fontSize={FONT_SIZE.default} to="/settings">
+              设置
+            </LinkWrapper>
           </Nav>
           <MagicBox>
             <Footer>
@@ -91,10 +99,6 @@ const Nav = styled.nav`
   gap: 0.5rem;
 
   font-weight: 600;
-  & > * {
-    font-size: 1.1rem;
-    /* text-decoration: none; */
-  }
 `;
 const Footer = styled.footer`
   height: 100%;

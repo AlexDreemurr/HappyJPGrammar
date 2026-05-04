@@ -139,7 +139,12 @@ function PhraseSet({ phraseSetId }) {
       <DefaultWrapper>
         {sortOrder === "default" &&
           phrases.map((phrase, index) => (
-            <PhraseDialog key={phrase.id} phrase={phrase} showKana={showKana} />
+            <PhraseDialog
+              key={phrase.id}
+              phrase={phrase}
+              showKana={showKana}
+              textIndent="2rem"
+            />
           ))}
       </DefaultWrapper>
 
@@ -155,6 +160,7 @@ function PhraseSet({ phraseSetId }) {
                     key={phrase.id}
                     phrase={phrase}
                     showKana={showKana}
+                    textIndent="3rem"
                   />
                 ))}
               </PhraseItems>
@@ -208,7 +214,7 @@ const InitialLetter = styled.h3`
   width: fit-content;
   padding: 0.1rem 0.5rem;
   margin: 0;
-  margin-left: 1rem;
+  margin-left: 2rem;
   border-radius: 0.5rem;
   &:first-of-type {
     margin-top: 0.5rem;

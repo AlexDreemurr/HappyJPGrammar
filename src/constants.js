@@ -16,3 +16,11 @@ export const FONT_FAMILY = {
   chinese_secondary: "Noto Sans SC",
   english_primary: "Raleway",
 };
+
+export const FONT_SIZE = {
+  giant: "1.25rem",
+  large: "1.125rem",
+  default: "1rem",
+  small: "0.9rem",
+  tiny: "0.8rem",
+};

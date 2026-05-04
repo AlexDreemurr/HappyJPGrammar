@@ -10,7 +10,7 @@ import { BarLoader } from "react-spinners";
 import { formatToChinaTime } from "../utility";
 import VisuallyHidden from "./VisuallyHidden";
 
-function PhraseDialog({ phrase, showKana }) {
+function PhraseDialog({ phrase, showKana, textIndent = "2rem" }) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [examples, setExamples] = React.useState([]);
   const [status, setStatus] = React.useState("free");
@@ -50,7 +50,7 @@ function PhraseDialog({ phrase, showKana }) {
       }}
     >
       <Dialog.Trigger asChild>
-        <PhraseItem key={phrase.id}>
+        <PhraseItem key={phrase.id} $textIndent={textIndent}>
           {getPhraseText(phrase, showKana)}
         </PhraseItem>
       </Dialog.Trigger>
@@ -117,7 +117,7 @@ const PhraseItem = styled.div`
   padding: 0.45rem 0.4rem 0.35rem 0.4rem;
   /* background-color: var(--gray85); */
   border-bottom: 1px var(--gray60) solid;
-  text-indent: 2rem;
+  text-indent: ${(p) => p.$textIndent};
   font-family: ${FONT_FAMILY.japanese_primary};
   &:hover {
     background-color: var(--gray85);

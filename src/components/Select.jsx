@@ -39,10 +39,11 @@ const NativeSelect = styled.select`
   border-radius: 8px;
 `;
 const SelectWrapper = styled.div`
-  height: 43px;
-  background-color: var(--gray85);
+  height: 35px;
+  background-color: white;
+  border: 1px var(--gray40) solid;
   color: var(--gray15);
-  padding: 12px 52px 12px 16px;
+  padding: 6px 52px 10px 16px;
   border-radius: 8px;
   ${NativeSelect}:hover + & {
     color: black;

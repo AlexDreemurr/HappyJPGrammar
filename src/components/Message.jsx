@@ -15,8 +15,13 @@ const STYLE = {
     "--Color": "var(--gray15)",
   },
 };
-function Message({ type = "info", children }) {
-  return <Wrapper style={STYLE[type]}>{children}</Wrapper>;
+
+function Message({ type = "info", fontSize = "1.125rem", children }) {
+  return (
+    <Wrapper style={STYLE[type]} $fontSize={fontSize}>
+      {children}
+    </Wrapper>
+  );
 }
 
 const Wrapper = styled.div`
@@ -25,6 +30,7 @@ const Wrapper = styled.div`
   background-color: var(--BackgroundColor);
   color: var(--Color);
   padding: 0.5rem 1rem;
+  font-size: ${(p) => p.$fontSize};
 `;
 
 export default Message;

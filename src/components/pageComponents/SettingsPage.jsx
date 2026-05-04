@@ -8,6 +8,7 @@ import {
   getStoredSharedDictSetIds,
   storeSharedDictSetIds,
 } from "../../sharedDictSettings";
+import { FONT_SIZE } from "../../constants";
 
 function SettingsPage() {
   const { phraseSets, status } = usePhraseSets();
@@ -101,7 +102,7 @@ const HeaderGroup = styled.div`
 `;
 
 const Title = styled.h1`
-  font-size: 1.25rem;
+  font-size: ${FONT_SIZE.giant};
 `;
 
 const Description = styled.p`
