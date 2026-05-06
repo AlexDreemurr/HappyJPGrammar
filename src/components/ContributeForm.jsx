@@ -1,9 +1,9 @@
 import React from "react";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import supabase from "../supabaseClient";
 import { deepseekAPI } from "../utility";
 import Message from "./Message";
-import { PacmanLoader } from "react-spinners";
+import BusyMessage from "./BusyMessage";
 import Select from "./Select";
 import usePhraseSets from "../hooks/usePhraseSets";
 import { FONT_FAMILY, FONT_SIZE } from "../constants";
@@ -38,6 +38,7 @@ function ContributeForm() {
       .from("vocabulary")
       .select("word")
       .eq("word", word.trim())
+      .eq("set_id", selectedPhraseSet) // 只在当前词汇集内查重，不同词汇集里可以有同名单词。
       .maybeSingle();
 
     if (queryError) {
@@ -55,14 +56,14 @@ function ContributeForm() {
 
     const result = await deepseekAPI(
       `单词：${word}，贡献者：${contributor}，备注：${notation}，set_id：${selectedPhraseSet}`,
-      `你是一个日语词典助手。用户会给你一个日语单词和贡献者名字。
+      `你是一个日语词典助手。用户会给你一个日语单词、一个贡献者名字（可选）、备注（可选）和set_id。
       首先判断输入是否是一个真实存在的日语单词。如果不是，只返回：{"valid": false}
       如果是，返回以下格式的JSON对象，不要有任何多余的文字和markdown格式，只返回纯JSON。
         要求：
-        1. sentences数组包含４个例文（字符串），例文中需要包含word或者word的变形。每个例文长度必须在80字到150字之间，难度逐渐递增（从N4到N2）。句子需要有真实情景。
-        2. 每个句子中把该单词的活用形用大括号括起来，例如：「彼は約束を{改めた}。」
+        1. sentences数组包含４个例文（字符串），例文中需要包含word或者word的变形。每个例文长度必须在80字到150字之间，难度逐渐递增（从N4到N2）。例文需要有真实情景。
+        2. 例文要作为题目，因此，每个例文只准出现一次该单词（或活用形）。把该单词（或活用形）用大括号括起来，例如：「彼は約束を{改めた}。」
         3. set_id是一个int型整数
-        4. 如果用户提供了备注，请参考备注内容生成更贴合该用法的例句
+        4. 如果用户提供了备注，请优先听从备注指示生成。
 
         格式如下：
         {
@@ -115,12 +116,7 @@ function ContributeForm() {
       {status !== "free" && (
         <StatusWrapper>
           {status === "busy" && (
-            <Message fontSize={FONT_SIZE.default}>
-              <BusyWrapper>
-                <PacmanLoader color="var(--gray15)" />
-                <span style={{ fontSize: `${FONT_SIZE.default}` }}>提交中</span>
-              </BusyWrapper>
-            </Message>
+            <BusyMessage fontSize={FONT_SIZE.default}>提交中</BusyMessage>
           )}
           {status === "error" && (
             <Message fontSize={FONT_SIZE.default} type="error">
@@ -173,6 +169,7 @@ function ContributeForm() {
           <RowWrapper data-required>
             <LabelWrapper htmlFor={phraseSetSelectId}>词汇集</LabelWrapper>
             <Select
+              disabled={status === "busy"}
               id={phraseSetSelectId}
               value={selectedPhraseSet}
               onChange={(event) =>
@@ -251,6 +248,29 @@ const FormElementWrapper = styled.div`
   padding: 0 1.5rem 0 1rem;
 `;
 
+const autofillStyles = css`
+  &:-webkit-autofill:not(:disabled),
+  &:-webkit-autofill:hover:not(:disabled),
+  &:-webkit-autofill:focus:not(:disabled),
+  &:-webkit-autofill:active:not(:disabled) {
+    border: 1px var(--gray40) solid;
+    border-radius: 2px;
+    -webkit-box-shadow: 0 0 0 1000px Field inset;
+    -webkit-text-fill-color: FieldText;
+    caret-color: FieldText;
+    transition: background-color 9999s ease-in-out 0s;
+  }
+
+  &:-webkit-autofill:disabled {
+    border: 1px var(--gray85) solid;
+    border-radius: 2px;
+    -webkit-box-shadow: 0 0 0 1000px ButtonFace inset;
+    -webkit-text-fill-color: GrayText;
+    caret-color: GrayText;
+    transition: background-color 9999s ease-in-out 0s;
+  }
+`;
+
 const InputWrapper = styled.input`
   font-size: ${FONT_SIZE.default};
   display: block;
@@ -262,10 +282,7 @@ const InputWrapper = styled.input`
     border-radius: 1px;
     outline-offset: 2px;
   }
-  &:-webkit-autofill {
-    -webkit-box-shadow: 0 0 0px 1000px white inset;
-    outline: none;
-  }
+  ${autofillStyles}
 `;
 const TextareaWrapper = styled.textarea`
   font-size: ${FONT_SIZE.default};
@@ -280,18 +297,12 @@ const TextareaWrapper = styled.textarea`
     border-radius: 1px;
     outline-offset: 2px;
   }
+  ${autofillStyles}
 `;
 const StatusWrapper = styled.div`
   width: 100%;
   padding: 0 1rem;
   margin-bottom: -1rem;
-  font-size: ${FONT_SIZE.default};
-`;
-const BusyWrapper = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem;
   font-size: ${FONT_SIZE.default};
 `;
 const ButtonWrapper = styled.div`

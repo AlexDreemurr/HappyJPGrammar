@@ -12,6 +12,12 @@ import {
   MessagesSquare,
   ArrowLeft,
   SquareCheck,
+  Info,
+  FolderPlus,
+  SquareMousePointer,
+  Trash2,
+  SquarePen,
+  Undo2,
 } from "lucide-react";
 
 const icons = {
@@ -26,6 +32,12 @@ const icons = {
   message: MessagesSquare,
   arrowLeft: ArrowLeft,
   squareCheck: SquareCheck,
+  info: Info,
+  folderPlus: FolderPlus,
+  select: SquareMousePointer,
+  remove: Trash2,
+  edit: SquarePen,
+  undo: Undo2,
   "chevron-down": ChevronDown,
 };
 

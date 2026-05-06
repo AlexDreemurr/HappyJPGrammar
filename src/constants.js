@@ -22,5 +22,5 @@ export const FONT_SIZE = {
   large: "1.125rem",
   default: "1rem",
   small: "0.9rem",
-  tiny: "0.8rem",
+  tiny: "0.75rem",
 };

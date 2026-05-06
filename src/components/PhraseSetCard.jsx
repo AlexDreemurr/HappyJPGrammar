@@ -2,26 +2,108 @@ import React from "react";
 import { formatToChinaTime } from "../utility";
 import styled from "styled-components";
 import UnstyledButton from "./UnstyledButton";
+import Icon from "./Icon";
+import LinkWrapper from "./LinkWrapper";
+import MyTooltip from "./MyTooltip";
+import { FONT_SIZE, QUERIES } from "../constants";
 
-function PhraseSetCard({ phraseSet, ...delegated }) {
+function PhraseSetCard({
+  phraseSet,
+  to,
+  selectionMode = false,
+  selected = false,
+  onSelectionChange,
+  ...delegated
+}) {
+  const checkboxId = React.useId();
+  const [showDescription, setShowDescription] = React.useState(false);
+  const shouldShowDescription = !selectionMode && showDescription;
+
+  function handleSelectionChange(checked) {
+    onSelectionChange?.(phraseSet.id, checked);
+  }
+
+  function handleCardClick() {
+    if (selectionMode) {
+      handleSelectionChange(!selected);
+    }
+  }
+
+  function handleCardKeyDown(event) {
+    if (!selectionMode) {
+      return;
+    }
+
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      handleSelectionChange(!selected);
+    }
+  }
+
   return (
-    <Wrapper {...delegated}>
-      <InfoWrapper>
+    <Wrapper
+      role={selectionMode ? "button" : undefined}
+      tabIndex={selectionMode ? 0 : undefined}
+      onClick={handleCardClick}
+      onKeyDown={handleCardKeyDown}
+      $selectionMode={selectionMode}
+      $selected={selected}
+      $showDescription={shouldShowDescription}
+      {...delegated}
+    >
+      {!selectionMode && (
+        <CardLink to={to} aria-label={`打开${phraseSet.name}`} />
+      )}
+      <InfoWrapper $hidden={shouldShowDescription}>
         <Info>{formatToChinaTime(phraseSet.created_at)}</Info>
         <Info>{phraseSet.count}</Info>
       </InfoWrapper>
 
-      {phraseSet.name}
+      <CardText $showDescription={shouldShowDescription}>
+        {shouldShowDescription
+          ? phraseSet.description || "---"
+          : phraseSet.name}
+      </CardText>
+
+      {selectionMode ? (
+        <Checkbox
+          id={checkboxId}
+          type="checkbox"
+          checked={selected}
+          aria-label={`选择${phraseSet.name}`}
+          onClick={(event) => event.stopPropagation()}
+          onChange={(event) => handleSelectionChange(event.target.checked)}
+        />
+      ) : (
+        <>
+          <DesktopInfo>
+            <MyTooltip trigger={<IconWrapper id="info" size={16} />}>
+              {phraseSet.description}
+            </MyTooltip>
+          </DesktopInfo>
+          <MobileInfoButton
+            type="button"
+            aria-label={showDescription ? "返回词汇集名称" : "查看词汇集介绍"}
+            onClick={(event) => {
+              event.stopPropagation();
+              setShowDescription((current) => !current);
+            }}
+          >
+            <Icon id={showDescription ? "undo" : "info"} size={16} />
+          </MobileInfoButton>
+        </>
+      )}
     </Wrapper>
   );
 }
-const Wrapper = styled(UnstyledButton)`
-  width: 200px;
-  height: 150px;
+const Wrapper = styled.div`
+  width: 100%;
+  height: 135px;
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
+  isolation: isolate;
   border-radius: 1rem;
   background-color: var(--gray15);
   color: var(--gray85);
@@ -31,6 +113,14 @@ const Wrapper = styled(UnstyledButton)`
   &:active {
     background-color: var(--gray40);
   }
+
+  ${(p) =>
+    p.$selectionMode &&
+    `
+      cursor: pointer;
+      outline: ${p.$selected ? "3px solid var(--gray40)" : "none"};
+      outline-offset: -3px;
+    `}
 
   &:nth-of-type(2n) {
     background-color: var(--gray85);
@@ -42,15 +132,75 @@ const Wrapper = styled(UnstyledButton)`
       background-color: var(--gray60);
     }
   }
+
+  @media ${QUERIES.tabletAndUp} {
+    height: 150px;
+  }
+`;
+const CardLink = styled(LinkWrapper)`
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background-color: transparent;
+  text-decoration: none;
+`;
+const IconWrapper = styled(Icon)`
+  display: block;
+`;
+const DesktopInfo = styled.div`
+  display: none;
+  position: absolute;
+  right: 0.5rem;
+  bottom: 0.45rem;
+  z-index: 4;
+
+  @media (hover: hover) and (pointer: fine) {
+    display: block;
+  }
+`;
+const MobileInfoButton = styled(UnstyledButton)`
+  position: absolute;
+  right: 0.5rem;
+  bottom: 0.45rem;
+  z-index: 4;
+  padding: 0.45rem;
+  transform: translate(0.45rem, 0.45rem);
+
+  @media (hover: hover) and (pointer: fine) {
+    display: none;
+  }
+`;
+const CardText = styled.p`
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding: 0 1.5rem;
+  text-align: center;
+  font-size: ${(p) => (p.$showDescription ? FONT_SIZE.tiny : "inherit")};
+  line-height: 1.5;
+  pointer-events: none;
+`;
+const Checkbox = styled.input`
+  position: absolute;
+  right: 0.55rem;
+  bottom: 0.5rem;
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  cursor: pointer;
+  z-index: 4;
 `;
 const InfoWrapper = styled.div`
+  z-index: 2;
   width: 100%;
   position: absolute;
   padding: 0.4rem 0.6rem;
   top: 0;
   left: 0;
-  display: flex;
+  display: ${(p) => (p.$hidden ? "none" : "flex")};
   justify-content: space-between;
+  pointer-events: none;
 `;
 const Info = styled.p`
   font-size: 0.8rem;

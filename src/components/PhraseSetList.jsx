@@ -1,54 +1,49 @@
 import React from "react";
 import styled from "styled-components";
-import supabase from "../supabaseClient";
+import { QUERIES } from "../constants";
 import Message from "./Message";
 import PhraseSetCard from "./PhraseSetCard";
-import LinkWrapper from "./LinkWrapper";
-import { HashLoader } from "react-spinners";
-import usePhraseSets from "../hooks/usePhraseSets";
 
-function PhraseSetList() {
-  const { phraseSets, status } = usePhraseSets();
+function PhraseSetList({
+  phraseSets,
+  selectionMode = false,
+  selectedPhraseSetIds = [],
+  onSelectionChange,
+}) {
   return (
     <Wrapper>
-      {/* <Info>请自由查阅</Info> */}
-      {status === "busy" && <HashLoader />}
-      {status === "ok" &&
-        phraseSets.map((phraseSet) => (
-          <CardLink key={phraseSet.id} to={`/phraseSet/${phraseSet.id}`}>
-            <PhraseSetCard phraseSet={phraseSet} />
-          </CardLink>
-        ))}
+      {phraseSets.length === 0 && <Message>还没有词汇集。</Message>}
+      {phraseSets.map((phraseSet) => {
+        const isSelected = selectedPhraseSetIds.includes(phraseSet.id);
+        const card = (
+          <PhraseSetCard
+            phraseSet={phraseSet}
+            to={`/phraseSet/${phraseSet.id}`}
+            selectionMode={selectionMode}
+            selected={isSelected}
+            onSelectionChange={onSelectionChange}
+          />
+        );
+
+        return <React.Fragment key={phraseSet.id}>{card}</React.Fragment>;
+      })}
     </Wrapper>
   );
 }
+
 const Wrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.5rem;
-
   position: relative;
-`;
-const CardLink = styled(LinkWrapper)`
-  text-decoration: none;
 
-  &:nth-of-type(2n) > button {
-    background-color: var(--gray85);
-    color: var(--gray15);
+  @media ${QUERIES.tabletAndUp} {
+    grid-template-columns: repeat(2, 200px);
   }
 
-  &:nth-of-type(2n) > button:hover {
-    background-color: var(--gray75);
+  @media ${QUERIES.laptopAndUp} {
+    grid-template-columns: repeat(3, 200px);
   }
-
-  &:nth-of-type(2n) > button:active {
-    background-color: var(--gray60);
-  }
-`;
-const Info = styled.p`
-  position: absolute;
-  top: -3rem;
 `;
 
 export default PhraseSetList;

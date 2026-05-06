@@ -8,11 +8,15 @@ import {
   getStoredSharedDictSetIds,
   storeSharedDictSetIds,
 } from "../../sharedDictSettings";
-import { FONT_SIZE } from "../../constants";
+import { FONT_SIZE, QUERIES } from "../../constants";
+import ProgressBar from "../ProgressBar";
+import { KatakanaRateContext } from "../../KatakanaRateContext";
 
 function SettingsPage() {
   const { phraseSets, status } = usePhraseSets();
   const [selectedSetIds, setSelectedSetIds] = React.useState([]);
+  const { katakanaRate, setKatakanaRate } =
+    React.useContext(KatakanaRateContext);
 
   React.useEffect(() => {
     if (status !== "ok") {
@@ -47,21 +51,41 @@ function SettingsPage() {
     });
   }
 
+  function handleKatakanaRateChange(nextValue) {
+    setKatakanaRate(nextValue / 100);
+  }
+
   return (
     <Wrapper>
-      <HeaderGroup>
-        <Title>设置</Title>
+      <Title>设置</Title>
+
+      <FeatureBlock>
+        <Description>切换显示假名的比例</Description>
+        <RateControl>
+          <ProgressBar
+            size="small"
+            value={katakanaRate * 100}
+            onChange={handleKatakanaRateChange}
+            ariaLabel="切换显示假名的比例"
+          />
+          <RateValue>{Math.round(katakanaRate * 100)}%</RateValue>
+        </RateControl>
+      </FeatureBlock>
+
+      <FeatureBlock>
         <Description>
           点击词汇集卡片来设置“共享单词练习”的题库范围。
         </Description>
-      </HeaderGroup>
 
-      {status === "busy" && <HashLoader />}
-      {status === "error" && (
-        <Message type="error">词汇集加载失败，请稍后重试。</Message>
-      )}
-      {status === "ok" && (
-        <>
+        {status === "busy" && (
+          <PhraseSetsLoadingWrapper>
+            <HashLoader />
+          </PhraseSetsLoadingWrapper>
+        )}
+        {status === "error" && (
+          <Message type="error">词汇集加载失败，请稍后重试。</Message>
+        )}
+        {status === "ok" && (
           <CardGrid>
             {phraseSets.map((phraseSet) => {
               const isSelected = selectedSetIds.includes(phraseSet.id);
@@ -79,8 +103,8 @@ function SettingsPage() {
               );
             })}
           </CardGrid>
-        </>
-      )}
+        )}
+      </FeatureBlock>
     </Wrapper>
   );
 }
@@ -88,21 +112,24 @@ function SettingsPage() {
 const Wrapper = styled.main`
   width: 100%;
   max-width: 800px;
-  padding: 2rem 1.5rem;
+  padding: 2rem 2rem;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   gap: 1rem;
 `;
 
-const HeaderGroup = styled.div`
+const FeatureBlock = styled.section`
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 0rem;
+  align-items: stretch;
+  gap: 0.5rem;
 `;
 
 const Title = styled.h1`
   font-size: ${FONT_SIZE.giant};
+  margin-bottom: -0.5rem;
 `;
 
 const Description = styled.p`
@@ -110,14 +137,45 @@ const Description = styled.p`
   font-size: 1rem;
 `;
 
-const CardGrid = styled.div`
-  display: flex;
-  flex-wrap: wrap;
+const RateControl = styled.div`
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) 3rem;
+  align-items: center;
   gap: 0.75rem;
 `;
 
+const RateValue = styled.span`
+  color: var(--gray15);
+  font-size: ${FONT_SIZE.default};
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+`;
+
+const CardGrid = styled.div`
+  margin-top: 0.5rem;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+
+  @media ${QUERIES.tabletAndUp} {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @media ${QUERIES.laptopAndUp} {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+`;
+
+const PhraseSetsLoadingWrapper = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding-top: 1.5rem;
+`;
+
 const SelectableCard = styled(PhraseSetCard)`
-  width: 160px;
+  width: 100%;
   height: 112px;
   font-size: 0.95rem;
   transition: box-shadow 120ms ease, opacity 120ms ease;
@@ -137,7 +195,7 @@ const SelectableCard = styled(PhraseSetCard)`
   &::after {
     content: attr(data-status);
     position: absolute;
-    right: 0.5rem;
+    left: 0.5rem;
     bottom: 0.4rem;
     font-size: 0.75rem;
     line-height: 1.3;

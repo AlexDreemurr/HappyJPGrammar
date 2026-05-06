@@ -94,7 +94,12 @@ function PhraseSet({ phraseSetId }) {
     return Array.from(groups, ([initial, items]) => ({ initial, items }));
   }, [sortedPhrases]);
 
-  if (loading) return <HashLoader />;
+  if (loading)
+    return (
+      <LoadingWrapper>
+        <HashLoader />
+      </LoadingWrapper>
+    );
   if (error === "not_found")
     return <Message type="error">没有找到该词汇集哦~</Message>;
   if (error === "fetch_error")
@@ -115,7 +120,7 @@ function PhraseSet({ phraseSetId }) {
     <Wrapper>
       <ButtonGroup>
         <UnstyledButton onClick={() => navigate("/phraseSetList")}>
-          <IconWrapper id="arrowLeft" size="1.3rem" />
+          <IconWrapper id="arrowLeft" size="1.3rem" color="var(--gray15)" />
         </UnstyledButton>
         <TitleWrapper>{setInfo.name}</TitleWrapper>
         <UnstyledButton onClick={handleSortToggle}>
@@ -128,10 +133,11 @@ function PhraseSet({ phraseSetId }) {
                 : "ArrowDownZA"
             }
             size="1.3rem"
+            color="var(--gray15)"
           />
         </UnstyledButton>
         <UnstyledButton onClick={() => setShowKana((prev) => !prev)}>
-          <IconWrapper id="Languages" size="1.3rem" />
+          <IconWrapper id="Languages" size="1.3rem" color="var(--gray15)" />
         </UnstyledButton>
       </ButtonGroup>
 
@@ -181,6 +187,13 @@ const Wrapper = styled.div`
   gap: 0rem;
   padding: 0 0rem;
 `;
+const LoadingWrapper = styled.div`
+  width: 100%;
+  min-height: 80dvh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
 const IconWrapper = styled(Icon)`
   padding: 0.8rem;
 `;
@@ -226,5 +239,6 @@ const TitleWrapper = styled.p`
   margin-left: 1rem;
   margin-top: -0.05rem;
   font-weight: 500;
+  color: var(--gray15);
 `;
 export default PhraseSet;

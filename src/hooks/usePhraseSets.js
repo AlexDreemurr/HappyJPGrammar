@@ -5,31 +5,31 @@ function usePhraseSets() {
   const [phraseSets, setPhraseSets] = React.useState([]);
   const [status, setStatus] = React.useState("free");
 
-  React.useEffect(() => {
+  const fetchPhraseSets = React.useCallback(async () => {
     setStatus("busy");
-    async function fetchPhraseSets() {
-      const { data, error } = await supabase
-        .from("vocabulary_sets")
-        .select("*, vocabulary(count)");
+    const { data, error } = await supabase
+      .from("vocabulary_sets")
+      .select("*, vocabulary(count)");
 
-      if (error) {
-        setStatus("error");
-        return;
-      }
-
-      const processed = data.map((set) => ({
-        ...set,
-        count: set.vocabulary[0].count,
-      }));
-
-      setPhraseSets(processed);
-      setStatus("ok");
+    if (error) {
+      setStatus("error");
+      return;
     }
 
-    fetchPhraseSets();
+    const processed = data.map((set) => ({
+      ...set,
+      count: set.vocabulary[0].count,
+    }));
+
+    setPhraseSets(processed);
+    setStatus("ok");
   }, []);
 
-  return { phraseSets, status };
+  React.useEffect(() => {
+    queueMicrotask(fetchPhraseSets);
+  }, [fetchPhraseSets]);
+
+  return { phraseSets, status, refetchPhraseSets: fetchPhraseSets };
 }
 
 export default usePhraseSets;

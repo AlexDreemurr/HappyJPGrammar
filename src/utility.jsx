@@ -53,22 +53,42 @@ export function getNewQuizObject(grammars) {
   };
   return newQuizObject;
 }
-export async function fetchSharedDictQuiz(supabase) {
+function getChoiceLabel({ word, reading }, katakanaRate) {
+  if (Math.random() < katakanaRate) {
+    return reading || word;
+  }
+
+  return word;
+}
+
+export async function fetchSharedDictQuiz(supabase, katakanaRate = 0) {
   // 访问supabase共享数据库并生成一道随机题目
   const phraseSetIds = getStoredSharedDictSetIds();
   const vocab = await getRandomVocab(supabase, phraseSetIds);
   const otherChoices = await getRandomWords(3, vocab.word, supabase, phraseSetIds);
   const rawSentence = vocab.sentences[parseInt(Math.random() * 4)];
   const [sentence, answer] = splitSentence(rawSentence);
+  const correctChoice = extractBrackets(rawSentence);
+  const choices = shuffle([
+    {
+      value: correctChoice,
+      label: getChoiceLabel(
+        { word: correctChoice, reading: vocab.reading },
+        katakanaRate
+      ),
+    },
+    ...otherChoices.map((v) => ({
+      value: v.word,
+      label: getChoiceLabel(v, katakanaRate),
+    })),
+  ]);
 
   return {
     id: Math.random(),
     rawSentence,
     question: sentence,
-    choices: shuffle([
-      extractBrackets(rawSentence),
-      ...otherChoices.map((v) => v.word),
-    ]),
+    choices: choices.map((choice) => choice.value),
+    choiceLabels: choices.map((choice) => choice.label),
     answer,
     form: vocab.word,
     meaning: vocab.meaning,
@@ -155,7 +175,7 @@ export async function getRandomWords(
     attempts++;
     const offset = Math.floor(Math.random() * total);
     const { data } = await applyPhraseSetFilter(
-      supabase.from("vocabulary").select("word"),
+      supabase.from("vocabulary").select("word, reading"),
       phraseSetIds
     )
       .range(offset, offset)

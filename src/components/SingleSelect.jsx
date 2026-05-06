@@ -27,21 +27,27 @@ export default function SingleSelect({
       <Fieldset>
         <Legend>{renderQuestion(source.question)}</Legend>
         <OptionGroup>
-          {source.choices.map((choice, index) => (
-            <SingleOption key={index}>
-              <input
-                type="radio"
-                id={`${QuizId}-choice${index + 1}`}
-                name={QuizId}
-                value={choice}
-                checked={userAnswer === choice}
-                onChange={(event) => {
-                  setUserAnswer(event.target.value);
-                }}
-              />
-              <Label htmlFor={`${QuizId}-choice${index + 1}`}>{choice}</Label>
-            </SingleOption>
-          ))}
+          {source.choices.map((choice, index) => {
+            const choiceLabel = source.choiceLabels?.[index] ?? choice;
+
+            return (
+              <SingleOption key={index}>
+                <input
+                  type="radio"
+                  id={`${QuizId}-choice${index + 1}`}
+                  name={QuizId}
+                  value={choice}
+                  checked={userAnswer === choice}
+                  onChange={(event) => {
+                    setUserAnswer(event.target.value);
+                  }}
+                />
+                <Label htmlFor={`${QuizId}-choice${index + 1}`}>
+                  {choiceLabel}
+                </Label>
+              </SingleOption>
+            );
+          })}
         </OptionGroup>
       </Fieldset>
       <Button

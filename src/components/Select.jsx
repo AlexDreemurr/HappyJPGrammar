@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 
 import Icon from "./Icon";
+import { FONT_SIZE } from "../constants";
 
 function getDisplayedValue(value, children) {
   const childArray = React.Children.toArray(children);
@@ -10,16 +11,22 @@ function getDisplayedValue(value, children) {
   return selectedChild.props.children;
 }
 
-const Select = ({ label, value, onChange, children }) => {
+const Select = ({
+  value,
+  onChange,
+  children,
+  fontSize = FONT_SIZE.default,
+  ...delegated
+}) => {
   const displayedValue = getDisplayedValue(value, children);
 
   return (
     <Wrapper>
-      <NativeSelect value={value} onChange={onChange}>
+      <NativeSelect value={value} onChange={onChange} {...delegated}>
         {children}
       </NativeSelect>
       <SelectWrapper>
-        <SelectedText>{displayedValue}</SelectedText>
+        <SelectedText $fontSize={fontSize}>{displayedValue}</SelectedText>
         <SelectIcon style={{ "--size": 24 + "px" }}>
           <Icon id="chevron-down" size={24} strokeWidth={2} />
         </SelectIcon>
@@ -36,7 +43,7 @@ const NativeSelect = styled.select`
   position: absolute;
   width: 100%;
   height: 100%;
-  border-radius: 8px;
+  border-radius: 2px;
 `;
 const SelectWrapper = styled.div`
   height: 35px;
@@ -44,7 +51,7 @@ const SelectWrapper = styled.div`
   border: 1px var(--gray40) solid;
   color: var(--gray15);
   padding: 6px 52px 10px 16px;
-  border-radius: 8px;
+  border-radius: 2px;
   ${NativeSelect}:hover + & {
     color: black;
   }
@@ -54,7 +61,7 @@ const SelectWrapper = styled.div`
   }
 `;
 const SelectedText = styled.p`
-  font-size: ${16 / 16}rem;
+  font-size: ${(p) => p.$fontSize};
   margin-top: -0.3rem;
 `;
 const SelectIcon = styled.div`

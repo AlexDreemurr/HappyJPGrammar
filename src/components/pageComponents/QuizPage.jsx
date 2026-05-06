@@ -6,9 +6,11 @@ import React from "react";
 import styled from "styled-components";
 import supabase from "../../supabaseClient";
 import { HashLoader } from "react-spinners";
+import { KatakanaRateContext } from "../../KatakanaRateContext";
 
 function QuizPage({ source, historyQuizes, setHistoryQuizes }) {
   /* source: grammar | sharedDict */
+  const { katakanaRate } = React.useContext(KatakanaRateContext);
   const [grammars, setGrammars] = React.useState([]);
   const [quizObject, setQuizObject] = React.useState({
     rawSentence: "",
@@ -45,7 +47,7 @@ function QuizPage({ source, historyQuizes, setHistoryQuizes }) {
           setStatus("free");
         });
     } else {
-      fetchSharedDictQuiz(supabase).then((quizObject) => {
+      fetchSharedDictQuiz(supabase, katakanaRate).then((quizObject) => {
         setQuizObject(quizObject);
         setStatus("free");
       });
@@ -61,10 +63,12 @@ function QuizPage({ source, historyQuizes, setHistoryQuizes }) {
     if (source === "grammar") {
       const newQuizObject = getNewQuizObject(grammars);
       setQuizObject(newQuizObject);
+      setUserAnswer(null);
       setStatus("free");
     } else {
-      fetchSharedDictQuiz(supabase).then((quizObject) => {
+      fetchSharedDictQuiz(supabase, katakanaRate).then((quizObject) => {
         setQuizObject(quizObject);
+        setUserAnswer(null);
         setStatus("free");
       });
     }
