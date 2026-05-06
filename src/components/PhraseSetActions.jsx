@@ -1,14 +1,26 @@
 ﻿import React from "react";
-import styled, { css } from "styled-components";
-import * as Dialog from "@radix-ui/react-dialog";
+import styled from "styled-components";
 import supabase from "../supabaseClient";
-import { FONT_FAMILY, FONT_SIZE, QUERIES } from "../constants";
+import { FONT_FAMILY, FONT_SIZE } from "../constants";
 import BusyMessage from "./BusyMessage";
-import Button from "./Button";
 import Icon from "./Icon";
 import Message from "./Message";
 import Select from "./Select";
 import UnstyledButton from "./UnstyledButton";
+import {
+  ButtonWrapper,
+  CompactRow,
+  Fields,
+  FormModal,
+  Form,
+  Input,
+  Label,
+  Row,
+  StatusArea,
+  SubmitButton,
+  Textarea,
+  TwoColumnRow,
+} from "./FormModal";
 
 function AddPhraseSetDialog({ onChanged }) {
   const nameInputId = React.useId();
@@ -58,26 +70,18 @@ function AddPhraseSetDialog({ onChanged }) {
   }
 
   return (
-    <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
-      <Dialog.Trigger asChild>
+    <FormModal
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      trigger={
         <TriggerButton type="button" aria-label="添加新的词汇集">
           <Icon id="folderPlus" size="1.3rem" color="var(--gray15)" />
         </TriggerButton>
-      </Dialog.Trigger>
-      <Dialog.Portal>
-        <Overlay />
-        <Content>
-          <Close asChild>
-            <CloseButton type="button" aria-label="关闭">
-              <IconWrapper id="close" size="1.3rem" />
-            </CloseButton>
-          </Close>
-          <Title>
-            <TitleWord>添加词汇集</TitleWord>
-            <TitleHint>vocabulary_sets</TitleHint>
-          </Title>
-
-          <Form onSubmit={handleSubmit}>
+      }
+      title="添加词汇集"
+      titleHint="vocabulary_sets"
+    >
+      <Form onSubmit={handleSubmit}>
             <StatusArea>
               {status === "busy" && <BusyMessage>请稍等</BusyMessage>}
               {status === "error" && (
@@ -135,12 +139,10 @@ function AddPhraseSetDialog({ onChanged }) {
             </Fields>
 
             <ButtonWrapper>
-              <Button disabled={status === "busy"}>添加</Button>
+              <SubmitButton disabled={status === "busy"}>添加</SubmitButton>
             </ButtonWrapper>
-          </Form>
-        </Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+      </Form>
+    </FormModal>
   );
 }
 
@@ -205,26 +207,18 @@ function DeletePhraseSetDialog({ selectedPhraseSets, onChanged }) {
   }
 
   return (
-    <Dialog.Root open={isOpen} onOpenChange={handleOpenChange}>
-      <Dialog.Trigger asChild>
+    <FormModal
+      open={isOpen}
+      onOpenChange={handleOpenChange}
+      trigger={
         <TriggerButton type="button" aria-label="删除已选词汇集">
           <Icon id="remove" size="1.3rem" color="var(--gray15)" />
         </TriggerButton>
-      </Dialog.Trigger>
-      <Dialog.Portal>
-        <Overlay />
-        <Content>
-          <Close asChild>
-            <CloseButton type="button" aria-label="关闭">
-              <IconWrapper id="close" size="1.3rem" />
-            </CloseButton>
-          </Close>
-          <Title>
-            <TitleWord>删除词汇集</TitleWord>
-            <TitleHint>{selectedPhraseSets.length} 个已选</TitleHint>
-          </Title>
-
-          <Form onSubmit={handleSubmit}>
+      }
+      title="删除词汇集"
+      titleHint={`${selectedPhraseSets.length} 个已选`}
+    >
+      <Form onSubmit={handleSubmit}>
             <StatusArea>
               {status === "busy" && <BusyMessage>删除中</BusyMessage>}
               {status === "error" && (
@@ -262,14 +256,12 @@ function DeletePhraseSetDialog({ selectedPhraseSets, onChanged }) {
             </Fields>
 
             <ButtonWrapper>
-              <Button disabled={status === "busy" || !hasSelection}>
+              <SubmitButton disabled={status === "busy" || !hasSelection}>
                 删除
-              </Button>
+              </SubmitButton>
             </ButtonWrapper>
-          </Form>
-        </Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+      </Form>
+    </FormModal>
   );
 }
 
@@ -365,26 +357,18 @@ function EditPhraseSetDialog({ selectedPhraseSet, onChanged }) {
   }
 
   return (
-    <Dialog.Root open={isOpen} onOpenChange={handleOpenChange}>
-      <Dialog.Trigger asChild>
+    <FormModal
+      open={isOpen}
+      onOpenChange={handleOpenChange}
+      trigger={
         <TriggerButton type="button" aria-label="编辑词汇集">
           <Icon id="edit" size="1.3rem" color="var(--gray15)" />
         </TriggerButton>
-      </Dialog.Trigger>
-      <Dialog.Portal>
-        <Overlay />
-        <Content>
-          <Close asChild>
-            <CloseButton type="button" aria-label="关闭">
-              <IconWrapper id="close" size="1.3rem" />
-            </CloseButton>
-          </Close>
-          <Title>
-            <TitleWord>编辑词汇集</TitleWord>
-            <TitleHint>{selectedPhraseSet?.name ?? "未选择"}</TitleHint>
-          </Title>
-
-          <Form onSubmit={handleSubmit}>
+      }
+      title="编辑词汇集"
+      titleHint={selectedPhraseSet?.name ?? "未选择"}
+    >
+      <Form onSubmit={handleSubmit}>
             <StatusArea>
               {status === "busy" && <BusyMessage>修改中</BusyMessage>}
               {status === "error" && (
@@ -456,94 +440,16 @@ function EditPhraseSetDialog({ selectedPhraseSet, onChanged }) {
             </Fields>
 
             <ButtonWrapper>
-              <SmallButton disabled={status === "busy"}>保存</SmallButton>
+              <SubmitButton disabled={status === "busy"}>保存</SubmitButton>
             </ButtonWrapper>
-          </Form>
-        </Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+      </Form>
+    </FormModal>
   );
 }
-
-const Overlay = styled(Dialog.Overlay)`
-  position: fixed;
-  inset: 0;
-  background-color: var(--transparentGray15);
-`;
-
-const Content = styled(Dialog.Content)`
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  margin: auto;
-  width: 90%;
-  max-width: ${400 / 16}rem;
-  max-height: calc(50% + 10rem);
-  height: fit-content;
-  border-radius: 1rem;
-  background-color: var(--gray95);
-  padding: 1.1rem 1.5rem;
-`;
-
-const Close = styled(Dialog.Close)`
-  position: absolute;
-  top: 0.2rem;
-  right: 0.2rem;
-  padding: 0.8rem;
-
-  @media ${QUERIES.tabletAndUp} {
-    top: 0.3rem;
-    right: 0.35rem;
-  }
-`;
 
 const TriggerButton = styled(UnstyledButton)`
   padding: 0.8rem;
   color: var(--gray15);
-`;
-
-const CloseButton = styled(UnstyledButton)`
-  color: var(--gray15);
-`;
-
-const IconWrapper = styled(Icon)`
-  transform: translateY(5px);
-`;
-
-const Title = styled(Dialog.Title)`
-  display: flex;
-  width: 90%;
-  column-gap: 1rem;
-  flex-wrap: wrap;
-`;
-
-const TitleText = styled.p`
-  font-size: ${FONT_SIZE.default};
-  font-family: ${FONT_FAMILY.chinese_primary};
-`;
-
-const TitleWord = styled(TitleText)``;
-
-const TitleHint = styled(TitleText)`
-  color: var(--gray40);
-`;
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-`;
-
-const StatusArea = styled.div`
-  min-height: 0;
-`;
-
-const Fields = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0rem;
 `;
 
 const SelectedList = styled.div`
@@ -553,85 +459,12 @@ const SelectedList = styled.div`
   max-height: 8rem;
   overflow: auto;
   color: var(--gray40);
-  font-family: ${FONT_FAMILY.japanese_primary}, ${FONT_FAMILY.chinese_primary};
+  font-family: ${FONT_FAMILY.chinese_primary}, ${FONT_FAMILY.japanese_primary};
   font-size: ${FONT_SIZE.default};
 `;
 
 const SelectedItem = styled.p`
   color: var(--gray15);
-`;
-
-const Label = styled.label`
-  width: 60px;
-  display: flex;
-  justify-content: flex-end;
-  align-items: baseline;
-  font-family: ${FONT_FAMILY.chinese_primary};
-  font-size: ${FONT_SIZE.small};
-
-  &::after {
-    content: " *";
-    font-size: 2rem;
-    font-family: ${FONT_FAMILY.english_primary};
-    visibility: hidden;
-    line-height: 1.5;
-  }
-`;
-
-const Row = styled.div`
-  display: flex;
-  gap: 0.5rem;
-  align-items: baseline;
-  min-width: 0;
-
-  &:has(input:required) ${Label}::after, &[data-required] ${Label}::after {
-    color: red;
-    visibility: visible;
-  }
-`;
-
-const TwoColumnRow = styled.div`
-  display: flex;
-  gap: 0rem;
-  align-items: baseline;
-  min-width: 0;
-`;
-
-const CompactRow = styled(Row)`
-  flex: 1 1 0;
-`;
-
-const inputStyles = css`
-  font-size: ${FONT_SIZE.small};
-  display: block;
-  min-width: 0;
-  flex: 1 100000 0;
-  outline: none;
-
-  &:focus {
-    outline: 2px solid var(--gray15);
-    border-radius: 1px;
-    outline-offset: 2px;
-  }
-`;
-
-const Input = styled.input`
-  ${inputStyles}
-`;
-
-const Textarea = styled.textarea`
-  ${inputStyles}
-  min-height: 4rem;
-  max-height: 10rem;
-  resize: vertical;
-`;
-
-const ButtonWrapper = styled.div`
-  padding: 0 1rem;
-`;
-
-const SmallButton = styled(Button)`
-  font-size: ${FONT_SIZE.small};
 `;
 
 export { AddPhraseSetDialog, DeletePhraseSetDialog, EditPhraseSetDialog };

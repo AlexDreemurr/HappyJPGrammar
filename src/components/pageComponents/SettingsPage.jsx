@@ -11,12 +11,18 @@ import {
 import { FONT_SIZE, QUERIES } from "../../constants";
 import ProgressBar from "../ProgressBar";
 import { KatakanaRateContext } from "../../KatakanaRateContext";
+import { useAuth } from "../../hooks/useAuth";
+import AuthModal from "../AuthModal";
+import Button from "../Button";
 
 function SettingsPage() {
   const { phraseSets, status } = usePhraseSets();
   const [selectedSetIds, setSelectedSetIds] = React.useState([]);
   const { katakanaRate, setKatakanaRate } =
     React.useContext(KatakanaRateContext);
+
+  const { user, isLoggedIn, signOut } = useAuth();
+  const [showAuth, setShowAuth] = React.useState(false);
 
   React.useEffect(() => {
     if (status !== "ok") {
@@ -58,6 +64,19 @@ function SettingsPage() {
   return (
     <Wrapper>
       <Title>设置</Title>
+      <FeatureBlock>
+        <Description>登录/注册</Description>
+        <AuthButtonWrapper>
+          {isLoggedIn ? (
+            <SmallButton onClick={signOut}>退出 ({user.email})</SmallButton>
+          ) : (
+            <SmallButton onClick={() => setShowAuth(true)}>
+              登录 / 注册
+            </SmallButton>
+          )}
+        </AuthButtonWrapper>
+        {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
+      </FeatureBlock>
 
       <FeatureBlock>
         <Description>切换显示假名的比例</Description>
@@ -134,7 +153,15 @@ const Title = styled.h1`
 
 const Description = styled.p`
   color: var(--gray40);
-  font-size: 1rem;
+  font-size: ${FONT_SIZE.default};
+`;
+
+const AuthButtonWrapper = styled.div`
+  width: min(100%, 16rem);
+`;
+
+const SmallButton = styled(Button)`
+  font-size: ${FONT_SIZE.small};
 `;
 
 const RateControl = styled.div`
@@ -179,10 +206,6 @@ const SelectableCard = styled(PhraseSetCard)`
   height: 112px;
   font-size: 0.95rem;
   transition: box-shadow 120ms ease, opacity 120ms ease;
-
-  /* &:hover {
-    transform: translateY(-1px);
-  } */
 
   &[data-selected="true"] {
     box-shadow: 0 0 0 2px var(--gray95), 0 0 0 5px var(--green15);
