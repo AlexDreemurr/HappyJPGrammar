@@ -1,5 +1,5 @@
 import { createGlobalStyle } from "styled-components";
-import { FONT_SIZE } from "./constants";
+import { FONT_FAMILY, FONT_SIZE } from "./constants";
 
 const GlobalStyles = createGlobalStyle`
   *, *::before, *::after {
@@ -12,7 +12,7 @@ const GlobalStyles = createGlobalStyle`
   }
 
   html {
-    font-family: "Noto Serif SC", serif;
+    font-family: ${FONT_FAMILY.chinese_primary}, serif;
     --gray95: hsl(0deg 0% 95%);
     --gray85: hsl(0deg 0% 85%);
     --gray75: hsl(0deg 0% 75%);
@@ -22,10 +22,24 @@ const GlobalStyles = createGlobalStyle`
     --gray15: hsl(0deg 0% 15%);
 
     --transparentGray15: hsl(0deg 0% 15% / 0.5);
+    
     --green85: hsl(150deg 20% 85%);
+    --green75: hsl(150deg 20% 75%);
+    --green30: hsl(150deg 40% 15%);
+    --green25: hsl(150deg 20% 25%);
     --green15: hsl(150deg 20% 15%);
+
     --red85: hsl(0deg 20% 85%);
+    --red75: hsl(0deg 20% 75%);
+    --red30: hsl(0deg 40% 15%);
+    --red25: hsl(0deg 20% 25%);
     --red15: hsl(0deg 20% 15%);
+
+    --gold85: hsl(50deg 60% 85%);
+    --gold75: hsl(50deg 60% 75%);
+    --gold30: hsl(50deg 60% 30%);
+    --gold25: hsl(50deg 60% 25%);
+    --gold15: hsl(50deg 20% 15%);
   }
 
   body {

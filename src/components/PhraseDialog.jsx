@@ -1,45 +1,82 @@
 import React from "react";
 import styled from "styled-components";
-import { FONT_FAMILY } from "../constants";
+import { FONT_FAMILY, FONT_SIZE } from "../constants";
 import * as Dialog from "@radix-ui/react-dialog";
 import { getPhraseText } from "./PhraseSet";
 import { QUERIES } from "../constants";
 import UnstyledButton from "./UnstyledButton";
 import Icon from "./Icon";
+import { Star } from "lucide-react";
 import { BarLoader } from "react-spinners";
 import { formatToChinaTime } from "../utility";
 import VisuallyHidden from "./VisuallyHidden";
 
-function PhraseDialog({ phrase, showKana, textIndent = "2rem" }) {
+function getCorrectCounts(correctCounts) {
+  if (!Array.isArray(correctCounts)) {
+    return [];
+  }
+
+  return correctCounts.slice(0, 4);
+}
+
+export function getCompletedSentenceCount(correctCounts) {
+  return Math.min(
+    4,
+    getCorrectCounts(correctCounts).filter((count) => Number(count) > 0).length
+  );
+}
+
+function PhraseDialog({
+  phrase,
+  showKana,
+  showStars = false,
+  textIndent = "2rem",
+}) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [examples, setExamples] = React.useState([]);
   const [status, setStatus] = React.useState("free");
+  const completedSentenceCount = getCompletedSentenceCount(
+    phrase.practiceCorrectCounts
+  );
 
   React.useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
+    if (!isOpen) return;
     setStatus("busy");
-    fetch(
-      `http://localhost:8080/eng/api_v0/search?query="${phrase.word}"&from=jpn&trans_filter=limit&trans_to=cmn`
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        const results = (data.results ?? []).map((item) => {
-          // translations 是二维数组：[[直接翻译...], [间接翻译...]]
-          // 拍平后找第一条中文翻译
-          const allTranslations = item.translations.flat();
-          const chineseTrans = allTranslations.find((t) => t.lang === "cmn");
 
-          return {
-            sentence: item.text,
-            translation: chineseTrans ? chineseTrans.text : null,
-          };
-        });
+    const base = `https://baedcqmxejvjzyvynqrp.supabase.co/functions/v1/tatoeba-proxy`;
+    const encodedQuery = encodeURIComponent("=" + phrase.word);
 
-        setExamples(results);
+    Promise.all([
+      fetch(`${base}?query=${encodedQuery}&trans_to=cmn`).then((r) => r.json()),
+      fetch(`${base}?query=${encodedQuery}&trans_to=eng`).then((r) => r.json()),
+    ])
+      .then(([cmnData, engData]) => {
+        const parse = (data, lang) =>
+          (data.results ?? [])
+            .filter((item) => item.text.includes(phrase.word)) // 过滤掉不含这个词的句子
+            .map((item) => {
+              const trans = item.translations
+                .flat()
+                .find((t) => t.lang === lang);
+              return {
+                sentence: item.text,
+                translation: trans ? trans.text : null,
+              };
+            });
+
+        const cmnResults = parse(cmnData, "cmn");
+        const engResults = parse(engData, "eng");
+
+        // 中文在前，英文在后，去掉重复的句子
+        const seenSentences = new Set(cmnResults.map((r) => r.sentence));
+        const dedupedEng = engResults.filter(
+          (r) => !seenSentences.has(r.sentence)
+        );
+
+        setExamples([...cmnResults, ...dedupedEng]);
         setStatus("free");
-      });
+      })
+      .catch(() => setStatus("free"));
   }, [isOpen]);
 
   return (
@@ -50,8 +87,27 @@ function PhraseDialog({ phrase, showKana, textIndent = "2rem" }) {
       }}
     >
       <Dialog.Trigger asChild>
-        <PhraseItem key={phrase.id} $textIndent={textIndent}>
-          {getPhraseText(phrase, showKana)}
+        <PhraseItem key={phrase.id}>
+          <PhraseText $textIndent={textIndent}>
+            {getPhraseText(phrase, showKana)}
+          </PhraseText>
+          {showStars && (
+            <AwardWrapper aria-label="sentence completion stars">
+              {Array.from({ length: 4 }, (_, index) => {
+                const isCompleted = index < completedSentenceCount;
+
+                return (
+                  <StarIcon
+                    key={index}
+                    color={isCompleted ? "var(--gold15)" : "var(--gray60)"}
+                    fill={isCompleted ? "var(--gold75)" : "none"}
+                    strokeWidth={1.2}
+                    size={18}
+                  />
+                );
+              })}
+            </AwardWrapper>
+          )}
         </PhraseItem>
       </Dialog.Trigger>
       <Dialog.Portal>
@@ -111,18 +167,36 @@ function PhraseDialog({ phrase, showKana, textIndent = "2rem" }) {
   );
 }
 const PhraseItem = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin: 0;
   margin-left: 2rem;
   margin-right: 2rem;
-  padding: 0.45rem 0.4rem 0.35rem 0.4rem;
+  padding: 0.45rem 1rem 0.35rem 0.4rem;
   /* background-color: var(--gray85); */
   border-bottom: 1px var(--gray60) solid;
-  text-indent: ${(p) => p.$textIndent};
   font-family: ${FONT_FAMILY.japanese_primary};
   &:hover {
     background-color: var(--gray85);
     cursor: pointer;
   }
+`;
+const PhraseText = styled.span`
+  font-size: ${FONT_SIZE.default};
+  min-width: 0;
+  text-indent: ${(p) => p.$textIndent};
+`;
+const AwardWrapper = styled.div`
+  width: 96px;
+  /* border: 1px black solid; */
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+  /* gap: 4px; */
+`;
+const StarIcon = styled(Star)`
+  display: block;
 `;
 const Overlay = styled(Dialog.Overlay)`
   position: fixed;
@@ -195,7 +269,7 @@ const LineBox = styled.div`
   align-items: flex-start;
 `;
 const IconWrapper = styled(Icon)`
-  transform: translateY(5px);
+  transform: translateY(4px);
 `;
 const Info = styled.p`
   font-family: ${FONT_FAMILY.japanese_primary}, ${FONT_FAMILY.chinese_primary};

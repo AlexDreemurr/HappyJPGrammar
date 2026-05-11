@@ -1,9 +1,9 @@
-import React from "react";
 import styled from "styled-components";
 import LinkWrapper from "./LinkWrapper";
 import SideMenu from "./SideMenu";
-import { QUERIES } from "../constants";
+import { FONT_FAMILY, QUERIES } from "../constants";
 import { FONT_SIZE } from "../constants";
+
 export default function Header() {
   return (
     <Wrapper>
@@ -30,7 +30,6 @@ export default function Header() {
           设置
         </LinkWrapper>
       </Nav>
-
       <MenuWrapper>
         <SideMenu />
       </MenuWrapper>
@@ -44,7 +43,6 @@ const Wrapper = styled.header`
   left: 0;
   right: 0;
   margin: auto;
-  /* height: 4rem; */
   position: fixed;
   top: 0;
   display: flex;
@@ -56,9 +54,6 @@ const Wrapper = styled.header`
     padding-left: 1.3rem;
     padding-right: 1.3rem;
   }
-  @media ${QUERIES.laptopAndUp} {
-    align-items: baseline;
-  }
 `;
 
 const TitleDesktop = styled(LinkWrapper)`
@@ -66,7 +61,7 @@ const TitleDesktop = styled(LinkWrapper)`
   color: var(--gray85);
   text-decoration: none;
   letter-spacing: 0;
-  font-family: Hina Mincho;
+  font-family: ${FONT_FAMILY.japanese_secondary};
   margin: 0.8rem 0;
   margin-right: auto;
 
@@ -94,6 +89,7 @@ const SpanMobile = styled.span`
 const Nav = styled.nav`
   font-size: 1.1rem;
   display: none;
+
   @media ${QUERIES.laptopAndUp} {
     display: flex;
     gap: 1rem;
@@ -102,6 +98,7 @@ const Nav = styled.nav`
 
 const MenuWrapper = styled.div`
   display: flex;
+
   @media ${QUERIES.laptopAndUp} {
     display: none;
   }

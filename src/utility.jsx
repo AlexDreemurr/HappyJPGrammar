@@ -1,10 +1,37 @@
 import React from "react";
 import styled from "styled-components";
 import { getStoredSharedDictSetIds } from "./sharedDictSettings";
+import supabase from "./supabaseClient";
+
+export function getSentenceText(sentence) {
+  return typeof sentence === "string" ? sentence : sentence?.text ?? "";
+}
+
+export function getSentenceTargetReading(sentence, wordReading = "") {
+  return typeof sentence === "string"
+    ? wordReading
+    : sentence?.target_reading ?? wordReading;
+}
+
+export function normalizeSentences(sentences, wordReading = "") {
+  if (!Array.isArray(sentences)) {
+    return [];
+  }
+
+  return sentences.map((sentence) =>
+    typeof sentence === "string"
+      ? { text: sentence, target_reading: wordReading }
+      : {
+          text: sentence?.text ?? "",
+          target_reading: sentence?.target_reading ?? wordReading,
+        }
+  );
+}
 
 export function splitSentence(sentence) {
   const inners = [];
-  const replaced = sentence.replace(/[{｛]([^{｛}｝]*)[}｝]/g, (_, inner) => {
+  const text = getSentenceText(sentence);
+  const replaced = text.replace(/[{｛]([^{｛}｝]*)[}｝]/g, (_, inner) => {
     inners.push(inner);
     return "@";
   });
@@ -23,6 +50,28 @@ export function shuffle(list) {
 export function randomPicker(list, num) {
   const unique = [...new Set(list)];
   return shuffle(unique).slice(0, num);
+}
+
+function getPracticeCountTotal(counts) {
+  if (!Array.isArray(counts)) {
+    return 0;
+  }
+
+  return counts.reduce((total, count) => total + (Number(count) || 0), 0);
+}
+
+function normalizePracticeCounts(counts) {
+  return Array.from({ length: 4 }, (_, index) => Number(counts?.[index]) || 0);
+}
+
+function getLeastPracticedSentenceIndex(counts) {
+  const normalizedCounts = normalizePracticeCounts(counts);
+  const lowestCount = Math.min(...normalizedCounts);
+  const candidateIndexes = normalizedCounts
+    .map((count, index) => (count === lowestCount ? index : null))
+    .filter((index) => index !== null);
+
+  return candidateIndexes[Math.floor(Math.random() * candidateIndexes.length)];
 }
 
 export function renderQuestion(question) {
@@ -64,16 +113,30 @@ function getChoiceLabel({ word, reading }, katakanaRate) {
 export async function fetchSharedDictQuiz(supabase, katakanaRate = 0) {
   // 访问supabase共享数据库并生成一道随机题目
   const phraseSetIds = getStoredSharedDictSetIds();
-  const vocab = await getRandomVocab(supabase, phraseSetIds);
-  const otherChoices = await getRandomWords(3, vocab.word, supabase, phraseSetIds);
-  const rawSentence = vocab.sentences[parseInt(Math.random() * 4)];
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const vocab = user
+    ? await getPracticeVocab(supabase, user.id, phraseSetIds)
+    : await getRandomVocab(supabase, phraseSetIds);
+  const otherChoices = await getRandomWords(
+    3,
+    vocab.word,
+    supabase,
+    phraseSetIds
+  );
+  const sentenceIndex = user
+    ? getLeastPracticedSentenceIndex(vocab.practiceAttemptCounts)
+    : parseInt(Math.random() * 4);
+  const rawSentence = vocab.sentences[sentenceIndex];
+  const targetReading = getSentenceTargetReading(rawSentence, vocab.reading);
   const [sentence, answer] = splitSentence(rawSentence);
   const correctChoice = extractBrackets(rawSentence);
   const choices = shuffle([
     {
       value: correctChoice,
       label: getChoiceLabel(
-        { word: correctChoice, reading: vocab.reading },
+        { word: correctChoice, reading: targetReading },
         katakanaRate
       ),
     },
@@ -92,37 +155,82 @@ export async function fetchSharedDictQuiz(supabase, katakanaRate = 0) {
     answer,
     form: vocab.word,
     meaning: vocab.meaning,
-    reading: vocab.reading,
+    reading: targetReading,
+    vocabularyReading: vocab.reading,
+    vocabularyId: vocab.id,
+    sentenceIndex,
   };
 }
-export async function deepseekAPI(text, prompt) {
-  const response = await fetch("https://api.deepseek.com/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${import.meta.env.VITE_DEEPSEEK_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: "deepseek-chat",
-      messages: [
-        {
-          role: "system",
-          content: prompt,
-        },
-        {
-          role: "user",
-          content: text,
-        },
-      ],
-      max_tokens: 2000,
-    }),
-  });
 
-  if (!response.ok) {
-    throw new Error(`翻译请求失败：${response.status}`);
+export async function updateVocabPractice(supabase, quizObject, isCorrect) {
+  if (!quizObject?.vocabularyId || quizObject.sentenceIndex === undefined) {
+    return;
   }
 
-  const data = await response.json();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return;
+  }
+
+  const sentenceIndex = Number(quizObject.sentenceIndex);
+  if (
+    !Number.isInteger(sentenceIndex) ||
+    sentenceIndex < 0 ||
+    sentenceIndex > 3
+  ) {
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from("vocab_practice")
+    .select("correct_counts, attempt_counts")
+    .eq("user_id", user.id)
+    .eq("vocabulary_id", quizObject.vocabularyId)
+    .maybeSingle();
+
+  if (error) {
+    console.error(error.message);
+    return;
+  }
+
+  const correctCounts = normalizePracticeCounts(data?.correct_counts);
+  const attemptCounts = normalizePracticeCounts(data?.attempt_counts);
+
+  attemptCounts[sentenceIndex] += 1;
+  if (isCorrect) {
+    correctCounts[sentenceIndex] += 1;
+  }
+
+  const { error: upsertError } = await supabase.from("vocab_practice").upsert(
+    {
+      user_id: user.id,
+      vocabulary_id: quizObject.vocabularyId,
+      correct_counts: correctCounts,
+      attempt_counts: attemptCounts,
+    },
+    { onConflict: "user_id,vocabulary_id" }
+  );
+
+  if (upsertError) {
+    console.error(upsertError.message);
+  }
+}
+export async function deepseekAPI(text, prompt, type = "translate") {
+  const { data, error } = await supabase.functions.invoke("deepseek-chat", {
+    body: {
+      type,
+      messages: [
+        { role: "system", content: prompt },
+        { role: "user", content: text },
+      ],
+    },
+  });
+
+  if (error) throw new Error(`请求失败：${error.message}`);
+
   return data.choices[0].message.content.trim();
 }
 
@@ -155,6 +263,68 @@ export async function getRandomVocab(supabase, phraseSetIds = null) {
   }
   return data;
 }
+
+export async function getPracticeVocab(supabase, userId, phraseSetIds = null) {
+  const { data: vocabularies, error } = await applyPhraseSetFilter(
+    supabase.from("vocabulary").select("*"),
+    phraseSetIds
+  );
+
+  if (error) {
+    console.error(error.message);
+    return getRandomVocab(supabase, phraseSetIds);
+  }
+
+  if (!vocabularies?.length) {
+    return null;
+  }
+
+  const vocabularyIds = vocabularies.map((vocab) => vocab.id);
+  const { data: practiceRows, error: practiceError } = await supabase
+    .from("vocab_practice")
+    .select("vocabulary_id, correct_counts, attempt_counts")
+    .eq("user_id", userId)
+    .in("vocabulary_id", vocabularyIds);
+
+  if (practiceError) {
+    console.error(practiceError.message);
+    return vocabularies[Math.floor(Math.random() * vocabularies.length)];
+  }
+
+  const practiceByVocabularyId = new Map(
+    (practiceRows ?? []).map((row) => [row.vocabulary_id, row])
+  );
+  let lowestTotal = Infinity;
+  const candidates = [];
+
+  for (const vocab of vocabularies) {
+    const total = getPracticeCountTotal(
+      practiceByVocabularyId.get(vocab.id)?.attempt_counts
+    );
+
+    if (total < lowestTotal) {
+      lowestTotal = total;
+      candidates.length = 0;
+      candidates.push(vocab);
+    } else if (total === lowestTotal) {
+      candidates.push(vocab);
+    }
+  }
+
+  const selectedVocab =
+    candidates[Math.floor(Math.random() * candidates.length)];
+
+  return {
+    ...selectedVocab,
+    practiceCorrectCounts: normalizePracticeCounts(
+      practiceByVocabularyId.get(selectedVocab.id)?.correct_counts
+    ),
+    practiceAttemptCounts: normalizePracticeCounts(
+      practiceByVocabularyId.get(selectedVocab.id)?.attempt_counts
+    ),
+  };
+}
+
 export async function getRandomWords(
   count = 3,
   avoid_word = "",
@@ -191,16 +361,17 @@ export async function getRandomWords(
 }
 
 export function extractBrackets(str) {
-  const match = str.match(/\{(.+?)\}/);
+  const match = getSentenceText(str).match(/\{(.+?)\}/);
   return match ? match[1] : null;
 }
 
 export function getThreeParts(str) {
+  const text = getSentenceText(str);
   // 查找第一个左括号（支持全角 ｛ 和半角 {）
   let leftIndex = -1;
   let leftChar = null;
-  for (let i = 0; i < str.length; i++) {
-    const ch = str[i];
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
     if (ch === "{" || ch === "｛") {
       leftIndex = i;
       leftChar = ch;
@@ -210,14 +381,14 @@ export function getThreeParts(str) {
 
   // 没有左括号，直接返回纯文本段落
   if (leftIndex === -1) {
-    return <p>{str}</p>;
+    return <p>{text}</p>;
   }
 
   // 确定匹配的右括号类型
   const expectedRight = leftChar === "{" ? "}" : "｝";
   let rightIndex = -1;
-  for (let i = leftIndex + 1; i < str.length; i++) {
-    if (str[i] === expectedRight) {
+  for (let i = leftIndex + 1; i < text.length; i++) {
+    if (text[i] === expectedRight) {
       rightIndex = i;
       break;
     }
@@ -225,13 +396,13 @@ export function getThreeParts(str) {
 
   // 没有找到右括号，返回原文本段落
   if (rightIndex === -1) {
-    return <p>{str}</p>;
+    return <p>{text}</p>;
   }
 
   // 提取三部分
-  const before = str.slice(0, leftIndex); // 括号前的文本
-  const inside = str.slice(leftIndex + 1, rightIndex); // 括号内的内容（语法点）
-  const after = str.slice(rightIndex + 1); // 括号后的文本
+  const before = text.slice(0, leftIndex); // 括号前的文本
+  const inside = text.slice(leftIndex + 1, rightIndex); // 括号内的内容（语法点）
+  const after = text.slice(rightIndex + 1); // 括号后的文本
 
   return { before, inside, after };
 }

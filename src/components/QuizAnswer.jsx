@@ -3,7 +3,7 @@ import Button from "./Button";
 import React from "react";
 import SentenceBox from "./SentenceBox";
 import { PacmanLoader } from "react-spinners";
-import { deepseekAPI } from "../utility";
+import { deepseekAPI, getSentenceText } from "../utility";
 
 export default function QuizAnswer({
   quizObject,
@@ -11,6 +11,7 @@ export default function QuizAnswer({
   setIsChecking,
   setCurQuizNum,
   setStatus,
+  hideAnswerToast,
 }) {
   /* 
      quizObject:     题目对象
@@ -22,6 +23,7 @@ export default function QuizAnswer({
   const [isLoading, setIsLoading] = React.useState(false);
   const [translatedText, setTranslatedText] = React.useState("");
   const [translateError, setTranslateError] = React.useState(null);
+  const displayReading = quizObject.vocabularyReading ?? quizObject.reading;
 
   async function handleTranslate() {
     setNeedTranslate(true);
@@ -29,8 +31,9 @@ export default function QuizAnswer({
     setTranslateError(null);
     try {
       const result = await deepseekAPI(
-        quizObject.rawSentence,
-        "你是一个日文翻译助手。用户会发送日文句子，你只需要回复对应的中文翻译，不要添加任何解释或多余内容。"
+        getSentenceText(quizObject.rawSentence),
+        "你是一个日文翻译助手。用户会发送日文句子，你只需要回复对应的中文翻译，不要添加任何解释或多余内容。",
+        "translate"
       );
       setTranslatedText(result);
     } catch (err) {
@@ -60,7 +63,7 @@ export default function QuizAnswer({
       <TypoWrapper>
         <Grammar>
           {quizObject.form}
-          {!!quizObject.reading && `(${quizObject.reading})`}
+          {!!displayReading && `(${displayReading})`}
         </Grammar>
         的含义：{quizObject.meaning}
       </TypoWrapper>
@@ -68,6 +71,7 @@ export default function QuizAnswer({
         <Button onClick={handleTranslate}>获得翻译</Button>
         <Button
           onClick={() => {
+            hideAnswerToast();
             setIsChecking(false);
             setCurQuizNum((d) => d + 1);
             setStatus("busy");

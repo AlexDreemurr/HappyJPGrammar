@@ -6,7 +6,6 @@ import {
   ArrowDownAZ,
   ArrowDownZA,
   Languages,
-  ArrowUp01,
   User,
   Clock,
   MessagesSquare,
@@ -18,6 +17,15 @@ import {
   Trash2,
   SquarePen,
   Undo2,
+  Globe,
+  Lock,
+  Eye,
+  EyeOff,
+  Star,
+  StarOff,
+  Award,
+  ArrowDownWideNarrow,
+  ArrowDownNarrowWide,
 } from "lucide-react";
 
 const icons = {
@@ -38,6 +46,17 @@ const icons = {
   remove: Trash2,
   edit: SquarePen,
   undo: Undo2,
+  public: Globe,
+  private: Lock,
+  eye: Eye,
+  eyeOff: EyeOff,
+  star: Star,
+  starOff: StarOff,
+  award: Award,
+  arrowWideNarrowDown: ArrowDownWideNarrow,
+  arrowNarrowWideDown: ArrowDownNarrowWide,
+  arrowDownWideNarrow: ArrowDownWideNarrow,
+  arrowDownNarrowWide: ArrowDownNarrowWide,
   "chevron-down": ChevronDown,
 };
 

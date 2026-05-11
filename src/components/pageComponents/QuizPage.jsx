@@ -1,4 +1,8 @@
-import { getNewQuizObject, fetchSharedDictQuiz } from "../../utility";
+import {
+  getNewQuizObject,
+  fetchSharedDictQuiz,
+  updateVocabPractice,
+} from "../../utility";
 import SingleSelect from "../SingleSelect";
 import QuizAnswer from "../QuizAnswer";
 import Papa from "papaparse";
@@ -8,7 +12,13 @@ import supabase from "../../supabaseClient";
 import { HashLoader } from "react-spinners";
 import { KatakanaRateContext } from "../../KatakanaRateContext";
 
-function QuizPage({ source, historyQuizes, setHistoryQuizes }) {
+function QuizPage({
+  source,
+  historyQuizes,
+  setHistoryQuizes,
+  showAnswerToast,
+  hideAnswerToast,
+}) {
   /* source: grammar | sharedDict */
   const { katakanaRate } = React.useContext(KatakanaRateContext);
   const [grammars, setGrammars] = React.useState([]);
@@ -24,6 +34,12 @@ function QuizPage({ source, historyQuizes, setHistoryQuizes }) {
   const [curQuizNum, setCurQuizNum] = React.useState(1);
   const [userAnswer, setUserAnswer] = React.useState("");
   const [status, setStatus] = React.useState("free");
+
+  React.useEffect(() => {
+    return () => {
+      hideAnswerToast();
+    };
+  }, [hideAnswerToast]);
 
   /* 初始加载csv */
   React.useEffect(() => {
@@ -85,6 +101,14 @@ function QuizPage({ source, historyQuizes, setHistoryQuizes }) {
       "historyQuizes",
       JSON.stringify(newHistoryQuizes)
     );
+
+    if (source === "sharedDict") {
+      updateVocabPractice(
+        supabase,
+        quizObject,
+        userAnswer === quizObject.answer
+      );
+    }
   }, [isChecking]);
 
   return (
@@ -96,6 +120,9 @@ function QuizPage({ source, historyQuizes, setHistoryQuizes }) {
           userAnswer={userAnswer}
           setUserAnswer={setUserAnswer}
           setIsSubmit={setIsChecking}
+          onSubmitAnswer={() => {
+            showAnswerToast(userAnswer === quizObject.answer);
+          }}
         />
       )}
       {status !== "busy" && isChecking && (
@@ -105,6 +132,7 @@ function QuizPage({ source, historyQuizes, setHistoryQuizes }) {
           setIsChecking={setIsChecking}
           setCurQuizNum={setCurQuizNum}
           setStatus={setStatus}
+          hideAnswerToast={hideAnswerToast}
         />
       )}
     </Main>

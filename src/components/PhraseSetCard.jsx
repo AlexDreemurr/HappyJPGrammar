@@ -18,6 +18,12 @@ function PhraseSetCard({
   const checkboxId = React.useId();
   const [showDescription, setShowDescription] = React.useState(false);
   const shouldShowDescription = !selectionMode && showDescription;
+  const descriptionContent = (
+    <DescriptionContent
+      description={phraseSet.description}
+      phraseSetId={phraseSet.id}
+    />
+  );
 
   function handleSelectionChange(checked) {
     onSelectionChange?.(phraseSet.id, checked);
@@ -60,10 +66,14 @@ function PhraseSetCard({
       </InfoWrapper>
 
       <CardText $showDescription={shouldShowDescription}>
-        {shouldShowDescription
-          ? phraseSet.description || "---"
-          : phraseSet.name}
+        {shouldShowDescription ? descriptionContent : phraseSet.name}
       </CardText>
+
+      {phraseSet.privacy === "private" && (
+        <PrivacyBadge aria-label="私有词汇集">
+          <Icon id="private" size={16} />
+        </PrivacyBadge>
+      )}
 
       {selectionMode ? (
         <Checkbox
@@ -78,7 +88,7 @@ function PhraseSetCard({
         <>
           <DesktopInfo>
             <MyTooltip trigger={<IconWrapper id="info" size={16} />}>
-              {phraseSet.description}
+              {descriptionContent}
             </MyTooltip>
           </DesktopInfo>
           <MobileInfoButton
@@ -96,6 +106,16 @@ function PhraseSetCard({
     </Wrapper>
   );
 }
+
+function DescriptionContent({ description, phraseSetId }) {
+  return (
+    <>
+      <DescriptionText>{description || "---"}</DescriptionText>
+      <DescriptionId>ID: {phraseSetId}</DescriptionId>
+    </>
+  );
+}
+
 const Wrapper = styled.div`
   width: 100%;
   height: 135px;
@@ -171,15 +191,50 @@ const MobileInfoButton = styled(UnstyledButton)`
     display: none;
   }
 `;
+const PrivacyBadge = styled.div`
+  position: absolute;
+  right: 0.9rem;
+  bottom: 0.45rem;
+  z-index: 4;
+  padding: 0.45rem;
+  transform: translate(-0.45rem, 0.45rem);
+  pointer-events: none;
+`;
 const CardText = styled.p`
   position: relative;
   z-index: 2;
   width: 100%;
-  padding: 0 1.5rem;
+  max-height: ${(p) => (p.$showDescription ? "calc(100% - 2rem)" : "none")};
+  box-sizing: border-box;
+  padding: ${(p) => (p.$showDescription ? "0 1.5rem" : "0 1.25rem")};
+  overflow-x: hidden;
+  overflow-y: ${(p) => (p.$showDescription ? "auto" : "visible")};
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   text-align: center;
-  font-size: ${(p) => (p.$showDescription ? FONT_SIZE.tiny : "inherit")};
+  font-size: ${(p) => (p.$showDescription ? FONT_SIZE.tiny : FONT_SIZE.small)};
   line-height: 1.5;
-  pointer-events: none;
+  overflow-wrap: anywhere;
+  pointer-events: ${(p) => (p.$showDescription ? "auto" : "none")};
+  @media ${QUERIES.tabletAndUp} {
+    font-size: ${(p) =>
+      p.$showDescription ? FONT_SIZE.tiny : FONT_SIZE.default};
+  }
+  @media ${QUERIES.laptopAndUp} {
+    font-size: ${(p) =>
+      p.$showDescription ? FONT_SIZE.tiny : FONT_SIZE.default};
+  }
+`;
+const DescriptionText = styled.span`
+  display: block;
+  font-size: inherit;
+  line-height: inherit;
+`;
+const DescriptionId = styled.strong`
+  display: block;
+  font-size: inherit;
+  line-height: inherit;
+  font-weight: 700;
 `;
 const Checkbox = styled.input`
   position: absolute;

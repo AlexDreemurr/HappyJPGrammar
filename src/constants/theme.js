@@ -12,6 +12,8 @@ export const QUERIES = {
 
 export const FONT_FAMILY = {
   japanese_primary: "BIZ UDMincho",
+  japanese_secondary: "Hina Mincho",
+  japanese_tertiary: "Zen Kaku Gothic New",
   chinese_primary: "Noto Serif SC",
   chinese_secondary: "Noto Sans SC",
   english_primary: "Raleway",

@@ -3,13 +3,9 @@ import styled from "styled-components";
 import LinkWrapper from "../LinkWrapper";
 import Button from "../Button";
 
-// Temporary Code for testing
-import PhraseSetList from "../PhraseSetList";
-
 function StartPage() {
   return (
     <Wrapper>
-      {/* <PhraseSetList /> */}
       <ImgWrapper>
         <Img src="/HappyJPGrammar/study_nihongo.png" />
       </ImgWrapper>

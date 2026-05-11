@@ -25,18 +25,26 @@ function SideMenu() {
 
           <MagicBox />
           <Nav>
-            <LinkWrapper fontSize={FONT_SIZE.default} to="/contribute">
-              加词
-            </LinkWrapper>
-            <LinkWrapper fontSize={FONT_SIZE.default} to="/phraseSetList">
-              词汇集
-            </LinkWrapper>
-            <LinkWrapper fontSize={FONT_SIZE.default} to="/history">
-              历史
-            </LinkWrapper>
-            <LinkWrapper fontSize={FONT_SIZE.default} to="/settings">
-              设置
-            </LinkWrapper>
+            <Dialog.Close asChild>
+              <LinkWrapper fontSize={FONT_SIZE.default} to="/contribute">
+                加词
+              </LinkWrapper>
+            </Dialog.Close>
+            <Dialog.Close asChild>
+              <LinkWrapper fontSize={FONT_SIZE.default} to="/phraseSetList">
+                词汇集
+              </LinkWrapper>
+            </Dialog.Close>
+            <Dialog.Close asChild>
+              <LinkWrapper fontSize={FONT_SIZE.default} to="/history">
+                历史
+              </LinkWrapper>
+            </Dialog.Close>
+            <Dialog.Close asChild>
+              <LinkWrapper fontSize={FONT_SIZE.default} to="/settings">
+                设置
+              </LinkWrapper>
+            </Dialog.Close>
           </Nav>
           <MagicBox>
             <Footer>

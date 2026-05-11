@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>尹の日本語 用户使用手册</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 18mm 16mm;
+      }
+
+      :root {
+        --ink: #20231f;
+        --muted: #62665f;
+        --soft: #f3f0e8;
+        --paper: #fffdf8;
+        --line: #dad4c8;
+        --accent: #2f6f5e;
+        --accent-2: #ba5a31;
+        --accent-soft: #e7f1ec;
+        --gold: #b28a38;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: var(--paper);
+        font-family: "Microsoft YaHei", "Noto Sans CJK SC", "Source Han Sans SC",
+          Arial, sans-serif;
+        font-size: 10.5pt;
+        line-height: 1.72;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1,
+      h2,
+      h3,
+      .brand {
+        letter-spacing: 0;
+      }
+
+      h1 {
+        font-size: 30pt;
+        line-height: 1.15;
+        font-weight: 800;
+      }
+
+      h2 {
+        margin-top: 8mm;
+        padding-bottom: 2mm;
+        border-bottom: 1px solid var(--line);
+        color: var(--accent);
+        font-size: 18pt;
+        line-height: 1.25;
+      }
+
+      h3 {
+        margin-top: 5mm;
+        color: #32372f;
+        font-size: 12.5pt;
+      }
+
+      p {
+        margin-top: 2mm;
+      }
+
+      ul,
+      ol {
+        margin: 2mm 0 0 0;
+        padding-left: 5mm;
+      }
+
+      li {
+        margin: 1mm 0;
+      }
+
+      strong {
+        color: #171914;
+      }
+      img {
+        width: 50%;
+      }
+      .page {
+        page-break-after: always;
+      }
+
+      .page:last-child {
+        page-break-after: auto;
+      }
+
+      .cover {
+        min-height: 250mm;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        gap: 16mm;
+        padding: 10mm 0 0;
+      }
+
+      .cover-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10mm;
+      }
+
+      .brand {
+        font-family: "Yu Mincho", "Hiragino Mincho ProN", "Microsoft YaHei",
+          serif;
+        font-size: 22pt;
+        font-weight: 700;
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid var(--accent);
+        color: var(--accent);
+        border-radius: 999px;
+        padding: 1mm 4mm;
+        font-size: 9pt;
+        font-weight: 700;
+      }
+
+      .cover-main {
+        align-self: center;
+        display: grid;
+        gap: 8mm;
+      }
+
+      .subtitle {
+        max-width: 128mm;
+        color: var(--muted);
+        font-size: 12pt;
+      }
+
+      .cover-card {
+        margin-top: 4mm;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 4mm;
+      }
+
+      .mini-card {
+        min-height: 31mm;
+        border: 1px solid var(--line);
+        border-radius: 4mm;
+        padding: 4mm;
+        background: #ffffff;
+      }
+
+      .mini-card b {
+        display: block;
+        color: var(--accent);
+        font-size: 10pt;
+      }
+
+      .mini-card span {
+        display: block;
+        margin-top: 2mm;
+        color: var(--muted);
+        font-size: 9pt;
+        line-height: 1.55;
+      }
+
+      .cover-foot {
+        border-top: 1px solid var(--line);
+        padding-top: 4mm;
+        color: var(--muted);
+        font-size: 9pt;
+      }
+
+      .toc {
+        display: grid;
+        gap: 3mm;
+        margin-top: 8mm;
+      }
+
+      .toc-row {
+        display: grid;
+        grid-template-columns: 8mm 1fr auto;
+        align-items: baseline;
+        gap: 3mm;
+        padding: 3mm 0;
+        border-bottom: 1px dashed var(--line);
+      }
+
+      .toc-no {
+        color: var(--accent-2);
+        font-weight: 800;
+      }
+
+      .toc-title {
+        font-weight: 700;
+      }
+
+      .toc-desc {
+        color: var(--muted);
+        font-size: 9pt;
+      }
+
+      .notice {
+        margin-top: 5mm;
+        border-left: 4px solid var(--gold);
+        background: #fbf5e7;
+        padding: 4mm 5mm;
+        color: #5d4a1d;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 5mm;
+        margin-top: 4mm;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 4mm;
+        padding: 4mm;
+        background: #ffffff;
+        break-inside: avoid;
+      }
+
+      .panel h3 {
+        margin-top: 0;
+      }
+
+      .steps {
+        counter-reset: step;
+        display: grid;
+        gap: 3mm;
+        margin-top: 4mm;
+      }
+
+      .step {
+        counter-increment: step;
+        display: grid;
+        grid-template-columns: 9mm 1fr;
+        gap: 3mm;
+        break-inside: avoid;
+      }
+
+      .step::before {
+        content: counter(step);
+        width: 7mm;
+        height: 7mm;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: var(--accent);
+        color: #ffffff;
+        font-weight: 800;
+        font-size: 9pt;
+      }
+
+      .image-placeholder {
+        min-height: 54mm;
+        margin: 5mm 0 3mm;
+        border: 1.5px dashed #aeb3aa;
+        border-radius: 5mm;
+        background: linear-gradient(
+            135deg,
+            rgba(47, 111, 94, 0.08),
+            transparent 38%
+          ),
+          #ffffff;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        color: var(--muted);
+        padding: 8mm;
+        break-inside: avoid;
+      }
+
+      .image-placeholder b {
+        display: block;
+        color: var(--accent);
+        font-size: 12pt;
+      }
+
+      .caption {
+        color: var(--muted);
+        font-size: 9pt;
+        text-align: center;
+      }
+
+      .kbd {
+        display: inline-block;
+        border: 1px solid var(--line);
+        border-radius: 2mm;
+        padding: 0 1.5mm;
+        background: var(--soft);
+        color: #33362f;
+        font-size: 9pt;
+      }
+
+      .table {
+        width: 100%;
+        margin-top: 4mm;
+        border-collapse: collapse;
+        break-inside: avoid;
+      }
+
+      .table th,
+      .table td {
+        border: 1px solid var(--line);
+        padding: 2.5mm 3mm;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      .table th {
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-weight: 800;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      .callout {
+        margin-top: 4mm;
+        border-radius: 4mm;
+        padding: 4mm 5mm;
+        background: var(--accent-soft);
+        color: #25483d;
+        break-inside: avoid;
+      }
+
+      .footer-note {
+        margin-top: 8mm;
+        padding-top: 4mm;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 9pt;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="page cover">
+      <div class="cover-top">
+        <div class="brand">尹の日本語プラットフォーム</div>
+        <div class="tag">用户使用手册</div>
+      </div>
+
+      <div class="cover-main">
+        <h1>使用指南</h1>
+        <p class="subtitle">
+          这份手册面向第一次使用平台的用户，介绍入口、练习流程、词汇集、加词、历史记录和设置功能。
+          平台网址：
+          <a href="https://alexdreemurr.github.io/HappyJPGrammar/"
+            >https://alexdreemurr.github.io/HappyJPGrammar/</a
+          >
+        </p>
+
+        <div class="cover-card">
+          <div class="mini-card">
+            <b>语法练习</b>
+            <span>从题库中抽取日语例句，通过单选题练习目标语法。</span>
+          </div>
+          <div class="mini-card">
+            <b>共享词汇练习</b>
+            <span
+              >根据词汇集进行单词练习，对单词的印象更深刻，可按设置控制练习范围。</span
+            >
+          </div>
+          <div class="mini-card">
+            <b>词汇集管理</b>
+            <span>查看、创建、加入、编辑词汇集，并为练习准备题库。</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="cover-foot">
+        文档版本：1.0　｜　生成日期：2026 年 5 月 9
+        日　｜　适用对象：平台普通用户与词汇贡献者 |
+        注：本文档大部分由AI生成，难免有纰漏之处，敬请谅解。本平台还处于开发初步，加之开发者本人学识有限，仍在学习阶段，该平台采用React+styled-components负责前端，Supabase同时涵盖后端（持久化的edge
+        function)、数据库部分；为图方便，暂时部署在github-pages上的形式，没有正式域名。大部分前端代码均出自我手，有关后端、数据库的部分大部分由AI编写，质量低下，敬请谅解。
+      </div>
+    </section>
+
+    <section class="page">
+      <h2>目录</h2>
+      <div class="toc">
+        <div class="toc-row">
+          <div class="toc-no">01</div>
+          <div>
+            <div class="toc-title">快速开始</div>
+            <div class="toc-desc">认识首页、顶部导航和主要入口。</div>
+          </div>
+          <div class="muted">P3</div>
+        </div>
+        <div class="toc-row">
+          <div class="toc-no">02</div>
+          <div>
+            <div class="toc-title">完成一次练习</div>
+            <div class="toc-desc">选择答案、提交、查看解析、继续下一题。</div>
+          </div>
+          <div class="muted">P4</div>
+        </div>
+        <div class="toc-row">
+          <div class="toc-no">03</div>
+          <div>
+            <div class="toc-title">词汇集</div>
+            <div class="toc-desc">查看词汇、排序、切换假名、管理词汇集。</div>
+          </div>
+          <div class="muted">P6</div>
+        </div>
+        <div class="toc-row">
+          <div class="toc-no">04</div>
+          <div>
+            <div class="toc-title">加词与贡献</div>
+            <div class="toc-desc">向指定词汇集提交新单词和备注。</div>
+          </div>
+          <div class="muted">P8</div>
+        </div>
+        <div class="toc-row">
+          <div class="toc-no">05</div>
+          <div>
+            <div class="toc-title">设置、账号与历史</div>
+            <div class="toc-desc">
+              登录注册、练习范围、片假名比例和历史记录。
+            </div>
+          </div>
+          <div class="muted">P9</div>
+        </div>
+        <div class="toc-row">
+          <div class="toc-no">06</div>
+          <div>
+            <div class="toc-title">平台使用的 API</div>
+            <div class="toc-desc">
+              了解翻译、生成词条和查找例句会调用哪些服务。
+            </div>
+          </div>
+          <div class="muted">P10</div>
+        </div>
+      </div>
+
+      <!-- <div class="notice">
+        <strong>截图说明：</strong>
+        本手册中的虚线框为图片预留位。你可以在后续编辑 HTML
+        源文件时，把对应位置替换为实际截图，或直接在 PDF 编辑器中覆盖插入图片。
+      </div> -->
+    </section>
+
+    <section class="page">
+      <h2>01 快速开始</h2>
+      <p>
+        打开平台后，首页会展示应用标识和两个主要练习入口：<strong>语法练习</strong>与<strong>共享词汇练习</strong>。顶部导航提供常用功能，包括加词、词汇集、历史和设置；在较窄的屏幕上，这些入口会收纳到菜单中。
+      </p>
+
+      <div class="image-placeholder">
+        <img src="img/startPage.png" />
+        <div>
+          <b>首页截图</b>
+        </div>
+      </div>
+      <p class="caption">图 1：首页与主要入口</p>
+
+      <div class="grid-2">
+        <div class="panel">
+          <h3>主要入口</h3>
+          <ul>
+            <li>
+              <strong>语法练习：</strong
+              >用于固定语法句型练习，题目来自语法题库。
+            </li>
+            <li>
+              <strong>共享词汇练习：</strong>用于词汇集中的单词和例句练习。
+            </li>
+            <li>
+              <strong>词汇集：</strong>查看已有词汇集，进入某个词汇集浏览词条。
+            </li>
+            <li>
+              <strong>设置：</strong
+              >登录账号，调整共享词汇练习范围和假名显示比例。
+            </li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3>推荐使用顺序</h3>
+          <ol>
+            <li>进入设置，确认共享词汇练习会使用哪些词汇集。</li>
+            <li>从首页选择一种练习模式，完成数道题熟悉流程。</li>
+            <li>在词汇集中查看生词，必要时使用加词功能补充内容。</li>
+          </ol>
+        </div>
+      </div>
+      <div class="callout">
+        <strong>电脑端和移动端的入口略有不同：</strong
+        >电脑屏幕较宽时，顶部会直接显示“加词、词汇集、历史、设置”；手机或窄屏设备上，右上角会显示菜单按钮，点开后再选择对应功能。
+      </div>
+      <div class="image-placeholder">
+        <img src="img/startPageWithMenu.png" />
+        <div>
+          <b>打开菜单的首页截图</b>
+        </div>
+      </div>
+    </section>
+
+    <section class="page">
+      <h2>02 完成一次练习</h2>
+      <p>
+        练习页面采用单选题形式。题目会展示一段日语句子，目标位置以空缺或强调形式呈现；下方列出若干备选答案。选择答案后，点击<strong>提交</strong>即可查看结果。
+      </p>
+
+      <div class="image-placeholder">
+        <img src="img/PhraseExercisePage.png" />
+        <div>
+          <b>练习页面截图</b>
+        </div>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <div>
+            <h3>阅读题干</h3>
+            <p>阅读日语句子，查看空缺前后的语境，并在下方选项中选择答案。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div>
+            <h3>选择答案</h3>
+            <p>点击一个单选项。未选择答案时，提交按钮不可用，避免误提交。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div>
+            <h3>提交并查看反馈</h3>
+            <p>
+              提交后，系统会提示“回答正确！”或“好像有点不太对...”，并展示正确答案的含义。
+            </p>
+          </div>
+        </div>
+        <div class="step">
+          <div>
+            <h3>继续下一题</h3>
+            <p>点击<strong>继续:D</strong>，系统会加载下一道题。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout">
+        <strong>显示说明：</strong>
+        如果题目涉及词汇读音，答案页可能会在词条后显示假名读法。
+      </div>
+    </section>
+
+    <section class="page">
+      <h2>答案页与翻译</h2>
+      <p>
+        答案页会再次显示原句、目标语法或词汇形式、中文含义，并提供<strong>获得翻译</strong>按钮。点击后，平台会请求翻译服务，把日文例句翻译成中文。
+      </p>
+
+      <div class="image-placeholder">
+        <img src="img/PhraseAnswerPage.png" />
+        <div>
+          <b>答案页截图</b>
+        </div>
+      </div>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>页面元素</th>
+            <th>用途</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>答题反馈</td>
+            <td>告诉你本题是否答对。</td>
+          </tr>
+          <tr>
+            <td>原句</td>
+            <td>显示本题使用的完整句子，便于查看正确答案所在的位置。</td>
+          </tr>
+          <tr>
+            <td>获得翻译</td>
+            <td>请求中文翻译。网络或服务异常时，页面会提示翻译失败。</td>
+          </tr>
+          <tr>
+            <td>继续:D</td>
+            <td>结束当前题目，加载下一题。</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        <strong>翻译功能说明：</strong>
+        点击“获得翻译”后，页面会向平台接口发送当前日文例句，并在返回后显示中文翻译。翻译请求需要网络连接，失败时页面会显示错误提示。
+      </div>
+    </section>
+
+    <section class="page">
+      <h2>03 词汇集</h2>
+      <p>
+        词汇集用于组织共享词汇练习的题库。你可以把它理解成一个个“单词文件夹”：每个词汇集里放着一组单词、读音、含义和例句。进入<strong>词汇集</strong>页面后，你可以查看自己可访问的词汇集卡片；点击某张卡片即可进入详情页，浏览其中的词条。
+      </p>
+
+      <div class="image-placeholder">
+        <img src="img/PhraseSetListPage.png" />
+        <div>
+          <b>词汇集列表截图</b>
+        </div>
+      </div>
+
+      <h3>词汇集卡片信息</h3>
+      <p>
+        每张卡片中间显示词汇集名称，卡片上方通常会显示创建时间和词条数量。如果左下角出现锁形标记，说明这是私有词汇集，通常需要通过
+        ID 和密码加入。
+      </p>
+
+      <div class="grid-2">
+        <div class="panel">
+          <h3>电脑端查看介绍和 ID</h3>
+          <p>
+            在电脑端，把鼠标悬停到卡片右下角的
+            <span class="kbd">info</span>
+            图标上，就可以查看词汇集介绍和 ID。ID
+            常用于加入私有词汇集，或者把某个词汇集分享给别人。
+          </p>
+        </div>
+        <div class="panel">
+          <h3>移动端查看介绍和 ID</h3>
+          <p>
+            手机和平板没有“鼠标悬停”，所以需要点击卡片右下角的
+            <span class="kbd">info</span>
+            按钮。卡片会切换成介绍内容；想回到词汇集名称时，再点一次右下角的返回图标即可。
+          </p>
+        </div>
+      </div>
+
+      <h3>词汇集详情页</h3>
+      <p>
+        详情页会列出词汇集中的单词。顶部按钮可返回列表、切换排序方式、切换单词显示为原词或假名。排序按钮会在默认顺序、<span
+          class="kbd"
+          >あ→ん</span
+        >、<span class="kbd">ん→あ</span>之间循环。
+      </p>
+
+      <div class="grid-2">
+        <div class="panel">
+          <h3>查看词条</h3>
+          <p>
+            点击词条会打开详情弹窗。弹窗里会显示单词原形、读音、中文含义、例句、贡献者和添加时间。例句加载需要一点时间，如果暂时显示为
+            <span class="kbd">---</span>，可以稍等或重新打开。
+          </p>
+        </div>
+        <div class="panel">
+          <h3>切换假名</h3>
+          <p>
+            点击语言图标后，词条列表会在“原词显示”和“假名显示”之间切换。再次点击同一个图标，可以切回原来的显示方式。
+          </p>
+        </div>
+      </div>
+      <div class="callout">
+        <strong>排序按钮说明：</strong>
+        顶部的排序图标每点一次会切换一种状态：默认顺序 → 按假名从
+        <span class="kbd">あ</span> 到 <span class="kbd">ん</span> → 按假名从
+        <span class="kbd">ん</span> 到 <span class="kbd">あ</span> →
+        回到默认顺序。按假名排序时，页面会按开头假名分组显示。
+      </div>
+      <div class="image-placeholder">
+        <img src="img/PhraseSetPage.png" />
+        <div>
+          <b>进入词汇集后的词汇列表截图</b>
+        </div>
+      </div>
+      <div class="image-placeholder">
+        <img src="img/PhraseSetPageSort.png" />
+        <img src="img/PhraseSetPageDetailed.png" />
+        <div>
+          <b>更多词汇集功能</b>
+        </div>
+      </div>
+    </section>
+
+    <section class="page">
+      <h2>管理词汇集</h2>
+      <p>
+        词汇集列表右上方提供若干操作图标。普通用户可以加入私有词汇集；有权限的用户可以创建、编辑或删除词汇集。部分操作需要输入词汇集密码。
+      </p>
+      <p>
+        如果你只是想浏览词汇，直接点击卡片即可。如果你要修改或删除词汇集，需要先点击选择模式按钮进入选择模式，再选中目标词汇集。进入选择模式后，卡片会变成“可选择”的状态，勾选框或选中高亮会帮助你确认当前选中了哪一个。
+      </p>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>功能</th>
+            <th>使用场景</th>
+            <th>需要填写的信息</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>添加词汇集</td>
+            <td>
+              创建一个新的公共或私有词汇集。可用于某本教材、某个课程或某次考试的单词整理。
+            </td>
+            <td>
+              名称、描述、权限、状态、密码、创建者。密码用于后续编辑、删除或加入。
+            </td>
+          </tr>
+          <tr>
+            <td>加入词汇集</td>
+            <td>
+              通过 ID
+              和密码加入私有词汇集。别人分享私有词汇集给你时，通常会同时给你这两项信息。
+            </td>
+            <td>词汇集 ID、密码。ID 可以在词汇集卡片的介绍信息里看到。</td>
+          </tr>
+          <tr>
+            <td>编辑词汇集</td>
+            <td>
+              修改已选词汇集的信息或密码。比如改名、补充描述、改成私有，或关闭继续添加。
+            </td>
+            <td>
+              名称、描述、作者、权限、状态、新密码。只填写需要改变的内容即可。
+            </td>
+          </tr>
+          <tr>
+            <td>删除词汇集</td>
+            <td>
+              删除已选词汇集。这个操作会影响词汇集本身，请确认选中对象无误后再提交。
+            </td>
+            <td>词汇集密码。密码不正确时不会删除。</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout">
+        私有词汇集通常需要登录后才能加入。若加入失败，请先确认账号状态、词汇集
+        ID、密码和网络连接。
+      </div>
+      <div class="notice">
+        <strong>权限小提醒：</strong>
+        “public/private”控制其他用户是否能直接看到词汇集；“open/close”表示词汇集当前是否处于开放状态。创建词汇集时，可以在描述里写明用途，方便其他用户识别。
+      </div>
+    </section>
+
+    <section class="page">
+      <h2>04 加词与贡献</h2>
+      <p>
+        通过<strong>加词</strong>页面，你可以向指定词汇集提交新的日语单词。系统会先检查同一词汇集中是否已经存在该词，再自动生成词条信息和例句。
+      </p>
+
+      <div class="image-placeholder">
+        <img src="img/ContributeForm.png" />
+        <div>
+          <b>加词表单截图</b>
+        </div>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <div>
+            <h3>填写词语名</h3>
+            <p>
+              输入真实存在的日语单词，例如“改める”。这是必填项。一般填写单词原形即可。
+            </p>
+          </div>
+        </div>
+        <div class="step">
+          <div>
+            <h3>补充贡献者和备注</h3>
+            <p>
+              贡献者和备注为可选项。备注可说明希望生成的用法、语境或侧重点，例如“请重点生成商务场景”“区分自动词用法”“想练习
+              N2 难度例句”等。
+            </p>
+          </div>
+        </div>
+        <div class="step">
+          <div>
+            <h3>选择词汇集</h3>
+            <p>选择这个单词要加入的词汇集。不同词汇集可以包含同名词。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div>
+            <h3>提交</h3>
+            <p>提交期间页面会显示“提交中”。成功后会提示“提交成功！”。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="notice">
+        如果输入的词不是有效日语单词，或同一词汇集中已存在该词，页面会显示错误提示。根据提示修改后重新提交即可。
+      </div>
+      <div class="callout">
+        <strong>加词后的内容会包含什么？</strong>
+        提交成功后，系统会为词条准备单词原形、假名读法、中文意思、JLPT
+        等级和多条例句。例句中的目标词会被标记出来，之后就可以作为共享词汇练习的题目来源。
+      </div>
+    </section>
+
+    <section class="page">
+      <h2>05 设置、账号与历史</h2>
+      <h3>登录与注册</h3>
+      <p>
+        在<strong>设置</strong>页面可以登录或注册账号。注册成功后请留意确认邮件；登录后，设置页会显示当前账号邮箱，并提供退出登录按钮。
+      </p>
+
+      <div class="image-placeholder">
+        <img src="img/SettingPage.png" />
+        <div>
+          <b>设置页面截图</b>
+        </div>
+      </div>
+
+      <h3>调整共享词汇练习范围</h3>
+      <p>
+        设置页会展示可用词汇集卡片。点击卡片即可决定该词汇集是否参与<strong>共享词汇练习</strong>。至少需要保留一个词汇集，避免练习范围为空。
+      </p>
+      <p>
+        被选中的词汇集会用更明显的边框标出来；未选中的词汇集会变淡。共享词汇练习只会从已选词汇集中抽取题目。
+      </p>
+
+      <h3>切换显示假名的比例</h3>
+      <p>
+        滑动比例条可以调整共享词汇练习中显示假名提示的概率。比例越高，题目中出现假名读法的概率越高；比例越低，题目中出现假名读法的概率越低。
+      </p>
+
+      <h3>历史记录</h3>
+      <p>
+        每次提交题目后，平台会把该题保存到浏览器本地历史记录中。进入<strong>历史</strong>页面可以查看已经提交过的句子。
+      </p>
+
+      <div class="callout">
+        历史记录保存在当前浏览器本地。如果更换设备、清理浏览器数据或使用不同浏览器，历史记录可能不会同步显示。
+      </div>
+    </section>
+
+    <section class="page">
+      <h2>06 平台使用的 API</h2>
+      <p>
+        平台在部分功能中会调用外部或后端接口。普通使用时不需要手动配置这些接口；了解它们的作用，有助于判断某些加载或报错来自哪里。
+      </p>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>接口/服务</th>
+            <th>使用位置</th>
+            <th>作用</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Supabase</td>
+            <td>账号、词汇集、词条、练习记录</td>
+            <td>
+              平台的数据服务。用于登录注册、读取词汇集、保存新增词条，以及记录共享词汇练习的作答情况。
+            </td>
+          </tr>
+          <tr>
+            <td>deepseek-chat</td>
+            <td>答案页翻译、加词生成</td>
+            <td>
+              平台通过 Supabase Edge Function 调用的 AI
+              接口。答案页点击“获得翻译”时，它会返回中文翻译；加词时，它会根据输入的单词、贡献者、备注和词汇集生成词条信息与例句。
+            </td>
+          </tr>
+          <tr>
+            <td>Tatoeba</td>
+            <td>词条详情弹窗</td>
+            <td>
+              Tatoeba 是一个多语言例句数据库。平台在查看词条详情时，会通过
+              <span class="kbd">tatoeba-proxy</span>
+              查询包含该单词的日语例句，并优先显示中文翻译，其次显示英文翻译。
+            </td>
+          </tr>
+          <tr>
+            <td>tatoeba-proxy</td>
+            <td>查找 Tatoeba 例句</td>
+            <td>
+              平台自己的 Supabase Edge Function
+              代理接口。前端不会直接把请求散落到页面里，而是通过这个代理接口向
+              Tatoeba 查询例句，便于统一处理跨域、参数和返回数据。
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout">
+        如果答案翻译、加词生成或词条例句暂时无法显示，通常和网络连接、后端接口或第三方服务响应有关。其他已加载的页面内容仍可继续查看。
+      </div>
+    </section>
+
+    <section class="page">
+      <h2>常见问题</h2>
+      <div class="panel">
+        <h3>为什么题目一直在加载？</h3>
+        <p>
+          可能是网络连接、题库服务或数据库响应较慢。请稍等片刻，或刷新页面后重试。
+        </p>
+      </div>
+
+      <div class="panel">
+        <h3>为什么翻译失败？</h3>
+        <p>
+          翻译功能依赖外部接口。若接口暂时不可用，页面会提示失败；可以稍后再次点击获得翻译。
+        </p>
+      </div>
+
+      <div class="panel">
+        <h3>为什么加入私有词汇集失败？</h3>
+        <p>
+          请检查是否已登录、词汇集 ID
+          是否正确、密码是否匹配，以及该词汇集是否允许加入。
+        </p>
+      </div>
+
+      <div class="panel">
+        <h3>为什么提交单词后显示已存在？</h3>
+        <p>
+          同一词汇集中不能重复添加同一个单词。你可以选择其他词汇集，或修改备注后联系管理员更新已有词条。
+        </p>
+      </div>
+
+      <div class="footer-note">
+        AlexDreemurr(尹さん)　2026 All Rights Reserved.
+      </div>
+    </section>
+  </body>
+</html>

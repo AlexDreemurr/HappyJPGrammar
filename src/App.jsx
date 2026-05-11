@@ -11,9 +11,18 @@ import SettingsPage from "./components/pageComponents/SettingsPage";
 
 /* Components */
 import Header from "./components/Header";
+import { CharacterToastOverlay } from "./components/CharacterToast";
 import styled from "styled-components";
 import ContributeForm from "./components/ContributeForm";
 import { KatakanaRateContext } from "./KatakanaRateContext";
+import { TOAST_DELAY } from "./constants";
+
+const CORRECT_TOAST_MILESTONES = [50, 20, 10, 5, 3];
+
+function getCorrectToastStatus(streak) {
+  const milestone = CORRECT_TOAST_MILESTONES.find((value) => streak === value);
+  return milestone ? `correct${milestone}` : "correct1";
+}
 
 function App() {
   const [historyQuizes, setHistoryQuizes] = React.useState(() => {
@@ -30,16 +39,58 @@ function App() {
 
     return Math.min(Math.max(storedRate, 0), 1);
   });
+  const [answerToast, setAnswerToast] = React.useState(null);
+  const correctStreakRef = React.useRef(0);
+  const answerToastTimerRef = React.useRef(null);
+  const answerToastIdRef = React.useRef(0);
+
+  const showAnswerToast = React.useCallback((isCorrect) => {
+    window.clearTimeout(answerToastTimerRef.current);
+    answerToastIdRef.current += 1;
+
+    if (!isCorrect) {
+      correctStreakRef.current = 0;
+      setAnswerToast({ id: answerToastIdRef.current, status: "wrong" });
+    } else {
+      correctStreakRef.current += 1;
+      setAnswerToast({
+        id: answerToastIdRef.current,
+        status: getCorrectToastStatus(correctStreakRef.current),
+      });
+    }
+
+    answerToastTimerRef.current = window.setTimeout(() => {
+      setAnswerToast(null);
+    }, TOAST_DELAY);
+  }, []);
+
+  const hideAnswerToast = React.useCallback(() => {
+    window.clearTimeout(answerToastTimerRef.current);
+    setAnswerToast(null);
+  }, []);
+
+  const resetAnswerToast = React.useCallback(() => {
+    window.clearTimeout(answerToastTimerRef.current);
+    correctStreakRef.current = 0;
+    setAnswerToast(null);
+  }, []);
 
   React.useEffect(() => {
     window.localStorage.setItem("katakanaRate", String(katakanaRate));
   }, [katakanaRate]);
+
+  React.useEffect(() => {
+    return () => {
+      window.clearTimeout(answerToastTimerRef.current);
+    };
+  }, []);
 
   return (
     <KatakanaRateContext.Provider value={{ katakanaRate, setKatakanaRate }}>
       <BrowserRouter basename="/HappyJPGrammar/">
         <Root>
           <Header />
+          <CharacterToastOverlay answerToast={answerToast} />
           <HelperBox />
           <Routes>
             <Route path="/" element={<StartPage />} />
@@ -50,6 +101,8 @@ function App() {
                   source="grammar"
                   historyQuizes={historyQuizes}
                   setHistoryQuizes={setHistoryQuizes}
+                  showAnswerToast={showAnswerToast}
+                  hideAnswerToast={hideAnswerToast}
                 />
               }
             />
@@ -60,6 +113,8 @@ function App() {
                   source="sharedDict"
                   historyQuizes={historyQuizes}
                   setHistoryQuizes={setHistoryQuizes}
+                  showAnswerToast={showAnswerToast}
+                  hideAnswerToast={hideAnswerToast}
                 />
               }
             />
@@ -70,7 +125,10 @@ function App() {
             <Route path="/contribute" element={<ContributeForm />} />
             <Route path="/phraseSetList" element={<PhraseSetPage />} />
             <Route path="/phraseSet/:phraseSetId" element={<PhraseSetPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
+            <Route
+              path="/settings"
+              element={<SettingsPage resetAnswerToast={resetAnswerToast} />}
+            />
           </Routes>
           <HelperBox />
         </Root>
@@ -93,10 +151,6 @@ const Root = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-`;
-const Main = styled.main`
-  padding: 2rem 1.5rem;
-  max-width: 800px;
 `;
 
 export default App;

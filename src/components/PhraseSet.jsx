@@ -7,7 +7,7 @@ import Button from "./Button";
 import { FONT_FAMILY } from "../constants";
 import Icon from "./Icon";
 import UnstyledButton from "./UnstyledButton";
-import PhraseDialog from "./PhraseDialog";
+import PhraseDialog, { getCompletedSentenceCount } from "./PhraseDialog";
 import { useNavigate } from "react-router-dom";
 
 function toHiraganaText(text) {
@@ -38,6 +38,7 @@ function PhraseSet({ phraseSetId }) {
   const [error, setError] = useState(null);
   const [showKana, setShowKana] = useState(false);
   const [sortOrder, setSortOrder] = useState("default"); // ← 新增
+  const [starMode, setStarMode] = useState("hidden");
 
   useEffect(() => {
     async function fetchData() {
@@ -58,8 +59,37 @@ function PhraseSet({ phraseSetId }) {
       } else if (phrasesResult.error) {
         setError("fetch_error");
       } else {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        const phraseRows = phrasesResult.data ?? [];
+        let practiceByVocabularyId = new Map();
+
+        if (user && phraseRows.length > 0) {
+          const phraseIds = phraseRows.map((phrase) => phrase.id);
+          const { data: practiceRows, error: practiceError } = await supabase
+            .from("vocab_practice")
+            .select("vocabulary_id, correct_counts")
+            .eq("user_id", user.id)
+            .in("vocabulary_id", phraseIds);
+
+          if (!practiceError) {
+            practiceByVocabularyId = new Map(
+              (practiceRows ?? []).map((row) => [row.vocabulary_id, row])
+            );
+          } else {
+            console.error(practiceError.message);
+          }
+        }
+
         setSetInfo(setResult.data);
-        setPhrases(phrasesResult.data);
+        setPhrases(
+          phraseRows.map((phrase) => ({
+            ...phrase,
+            practiceCorrectCounts:
+              practiceByVocabularyId.get(phrase.id)?.correct_counts ?? [],
+          }))
+        );
       }
 
       setLoading(false);
@@ -68,19 +98,67 @@ function PhraseSet({ phraseSetId }) {
     fetchData();
   }, [phraseSetId]);
 
+  function getPhraseStarCount(phrase) {
+    return getCompletedSentenceCount(phrase.practiceCorrectCounts);
+  }
+
+  function compareByStars(a, b) {
+    if (starMode !== "starsDesc" && starMode !== "starsAsc") {
+      return 0;
+    }
+
+    const difference = getPhraseStarCount(a) - getPhraseStarCount(b);
+    return starMode === "starsDesc" ? -difference : difference;
+  }
+
+  function compareByKana(a, b) {
+    const aReading = a.reading || a.word || "";
+    const bReading = b.reading || b.word || "";
+    const comparison = aReading.localeCompare(bReading, "ja");
+    return sortOrder === "asc" ? comparison : -comparison;
+  }
+
+  function getInitialKey(phrase) {
+    const initial = (phrase.reading || phrase.word || "").trim().charAt(0);
+    return initial ? toHiraganaInitial(initial) : "#";
+  }
+
+  function compareByInitial(a, b) {
+    const comparison = getInitialKey(a).localeCompare(getInitialKey(b), "ja");
+    return sortOrder === "asc" ? comparison : -comparison;
+  }
+
   // ← 新增：派生排序列表，不污染原始数据
-  const sortedPhrases = useMemo(() => {
-    if (sortOrder === "default") return phrases;
-    return [...phrases].sort((a, b) => {
-      const cmp = a.reading.localeCompare(b.reading, "ja");
-      return sortOrder === "asc" ? cmp : -cmp;
-    });
-  }, [phrases, sortOrder]);
+  const displayedPhrases = useMemo(() => {
+    const isStarSorting = starMode === "starsDesc" || starMode === "starsAsc";
+
+    if (sortOrder === "default" && !isStarSorting) {
+      return phrases;
+    }
+
+    return phrases
+      .map((phrase, index) => ({ phrase, index }))
+      .sort((a, b) => {
+        const starComparison = compareByStars(a.phrase, b.phrase);
+
+        if (sortOrder === "default") {
+          return starComparison || a.index - b.index;
+        }
+
+        return (
+          compareByInitial(a.phrase, b.phrase) ||
+          starComparison ||
+          compareByKana(a.phrase, b.phrase) ||
+          a.index - b.index
+        );
+      })
+      .map(({ phrase }) => phrase);
+  }, [phrases, sortOrder, starMode]);
 
   const groupedPhrases = useMemo(() => {
     const groups = new Map();
 
-    sortedPhrases.forEach((phrase) => {
+    displayedPhrases.forEach((phrase) => {
       const initial = (phrase.reading || phrase.word || "").trim().charAt(0);
       const key = initial ? toHiraganaInitial(initial) : "#";
 
@@ -92,7 +170,7 @@ function PhraseSet({ phraseSetId }) {
     });
 
     return Array.from(groups, ([initial, items]) => ({ initial, items }));
-  }, [sortedPhrases]);
+  }, [displayedPhrases]);
 
   if (loading)
     return (
@@ -112,6 +190,23 @@ function PhraseSet({ phraseSetId }) {
     );
   }
 
+  function handleStarModeToggle() {
+    setStarMode((currentMode) => {
+      if (currentMode === "hidden") return "visible";
+      if (currentMode === "visible") return "starsDesc";
+      if (currentMode === "starsDesc") return "starsAsc";
+      return "hidden";
+    });
+  }
+
+  const showStars = starMode !== "hidden";
+  const starIconId = {
+    hidden: "starOff",
+    visible: "star",
+    starsDesc: "arrowWideNarrowDown",
+    starsAsc: "arrowNarrowWideDown",
+  }[starMode];
+
   const sortLabel = { default: "默认顺序", asc: "あ→ん", desc: "ん→あ" }[
     sortOrder
   ];
@@ -123,6 +218,9 @@ function PhraseSet({ phraseSetId }) {
           <IconWrapper id="arrowLeft" size="1.3rem" color="var(--gray15)" />
         </UnstyledButton>
         <TitleWrapper>{setInfo.name}</TitleWrapper>
+        <UnstyledButton onClick={handleStarModeToggle}>
+          <IconWrapper id={starIconId} size="1.3rem" color="var(--gray15)" />
+        </UnstyledButton>
         <UnstyledButton onClick={handleSortToggle}>
           <IconWrapper
             id={
@@ -144,11 +242,12 @@ function PhraseSet({ phraseSetId }) {
       {/* 当排序为默认时显示的ui */}
       <DefaultWrapper>
         {sortOrder === "default" &&
-          phrases.map((phrase, index) => (
+          displayedPhrases.map((phrase) => (
             <PhraseDialog
               key={phrase.id}
               phrase={phrase}
               showKana={showKana}
+              showStars={showStars}
               textIndent="2rem"
             />
           ))}
@@ -166,6 +265,7 @@ function PhraseSet({ phraseSetId }) {
                     key={phrase.id}
                     phrase={phrase}
                     showKana={showKana}
+                    showStars={showStars}
                     textIndent="3rem"
                   />
                 ))}
@@ -237,8 +337,10 @@ const TitleWrapper = styled.p`
   margin-right: auto;
   font-size: 1rem;
   margin-left: 1rem;
-  margin-top: -0.05rem;
+  margin-top: -0.04rem;
   font-weight: 500;
   color: var(--gray15);
+  overflow: auto;
+  white-space: nowrap;
 `;
 export default PhraseSet;

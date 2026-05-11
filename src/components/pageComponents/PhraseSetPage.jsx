@@ -8,11 +8,13 @@ import {
   AddPhraseSetDialog,
   DeletePhraseSetDialog,
   EditPhraseSetDialog,
+  JoinPhraseSetDialog,
 } from "../PhraseSetActions";
 import Icon from "../Icon";
 import Message from "../Message";
 import UnstyledButton from "../UnstyledButton";
 import usePhraseSets from "../../hooks/usePhraseSets";
+import { useAuth } from "../../hooks/useAuth";
 import { QUERIES } from "../../constants";
 
 function PhraseSetPage() {
@@ -27,6 +29,7 @@ function PhraseSetPage() {
 
 function PhraseSetIndexPage() {
   const { phraseSets, status, refetchPhraseSets } = usePhraseSets();
+  const { user } = useAuth();
   const [selectionMode, setSelectionMode] = React.useState(false);
   const [selectedPhraseSetIds, setSelectedPhraseSetIds] = React.useState([]);
 
@@ -68,15 +71,19 @@ function PhraseSetIndexPage() {
           {selectionMode && (
             <EditPhraseSetDialog
               selectedPhraseSet={selectedPhraseSets[0] ?? null}
+              currentUserId={user?.id ?? null}
               onChanged={handlePhraseSetsChanged}
             />
           )}
           {selectionMode && (
             <DeletePhraseSetDialog
               selectedPhraseSets={selectedPhraseSets}
+              currentUserId={user?.id ?? null}
               onChanged={handlePhraseSetsChanged}
             />
           )}
+          <JoinPhraseSetDialog onChanged={handlePhraseSetsChanged} />
+          <AddPhraseSetDialog onChanged={refetchPhraseSets} />
           <SelectModeButton
             type="button"
             aria-label={selectionMode ? "退出选择模式" : "进入选择模式"}
@@ -84,10 +91,8 @@ function PhraseSetIndexPage() {
             onClick={handleSelectionModeToggle}
             $active={selectionMode}
           >
-            <Icon id="select" size="1.3rem" color="var(--gray15)" />
+            <Icon id="select" size="1.3rem" color="black" />
           </SelectModeButton>
-
-          <AddPhraseSetDialog onChanged={refetchPhraseSets} />
         </ActionIcons>
 
         {status === "error" && (
@@ -142,7 +147,7 @@ const LoadingWrapper = styled.div`
 
 const SelectModeButton = styled(UnstyledButton)`
   padding: 0.8rem;
-  color: var(--gray15);
+  color: black;
   border-radius: 1rem;
   background-color: ${(p) => (p.$active ? "var(--gray85)" : "transparent")};
 `;

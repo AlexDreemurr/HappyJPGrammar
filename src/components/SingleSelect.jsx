@@ -2,12 +2,14 @@ import Button from "./Button";
 import React from "react";
 import styled from "styled-components";
 import { renderQuestion } from "../utility";
+import { FONT_FAMILY } from "../constants";
 
 export default function SingleSelect({
   source,
   userAnswer,
   setUserAnswer,
   setIsSubmit,
+  onSubmitAnswer,
 }) {
   /* 
      source:     资源对象
@@ -52,6 +54,7 @@ export default function SingleSelect({
       </Fieldset>
       <Button
         onClick={() => {
+          onSubmitAnswer?.();
           setIsSubmit(true);
         }}
         disabled={!userAnswer}
@@ -64,7 +67,7 @@ export default function SingleSelect({
 const Article = styled.article``;
 const Fieldset = styled.fieldset`
   margin-bottom: 0.5rem;
-  font-family: "BIZ UDMincho";
+  font-family: ${FONT_FAMILY.japanese_primary};
 `;
 const Legend = styled.legend`
   /* background-color: hsl(70deg 5% 90%); */

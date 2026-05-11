@@ -1,3 +1,4 @@
+import React from "react";
 import styled, { css } from "styled-components";
 import * as Dialog from "@radix-ui/react-dialog";
 import { FONT_FAMILY, FONT_SIZE, QUERIES } from "../constants";
@@ -43,6 +44,33 @@ function FormModal({
         </FormModalContent>
       </Dialog.Portal>
     </Dialog.Root>
+  );
+}
+
+function FormModalPasswordInput({ disabled, ...delegated }) {
+  const [isVisible, setIsVisible] = React.useState(false);
+
+  return (
+    <FormModalPasswordInputWrapper>
+      <FormModalInput
+        {...delegated}
+        type={isVisible ? "text" : "password"}
+        disabled={disabled}
+      />
+      <FormModalPasswordToggle
+        type="button"
+        aria-label={isVisible ? "隐藏密码" : "显示密码"}
+        title={isVisible ? "隐藏密码" : "显示密码"}
+        onClick={() => setIsVisible((current) => !current)}
+        disabled={disabled}
+      >
+        <Icon
+          id={isVisible ? "eyeOff" : "eye"}
+          size="1rem"
+          color="currentColor"
+        />
+      </FormModalPasswordToggle>
+    </FormModalPasswordInputWrapper>
   );
 }
 
@@ -145,8 +173,10 @@ const FormModalRow = styled.div`
   align-items: baseline;
   min-width: 0;
 
-  &:has(input:required) ${FormModalLabel}::after,
-  &[data-required] ${FormModalLabel}::after {
+  &:has(input:required)
+    ${FormModalLabel}::after,
+    &[data-required]
+    ${FormModalLabel}::after {
     color: red;
     visibility: visible;
   }
@@ -181,6 +211,35 @@ const FormModalInput = styled.input`
   ${formModalInputStyles}
 `;
 
+const FormModalPasswordInputWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  flex: 1 100000 0;
+  gap: 0.35rem;
+`;
+
+const FormModalPasswordToggle = styled(UnstyledButton)`
+  flex: 0 0 auto;
+  color: var(--gray40);
+  padding: 0.2rem;
+  border-radius: 2px;
+
+  &:hover:not(:disabled) {
+    color: var(--gray15);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--gray15);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+`;
+
 const FormModalTextarea = styled.textarea`
   ${formModalInputStyles}
   min-height: 4rem;
@@ -213,6 +272,7 @@ export {
   FormModalCompactRow as CompactRow,
   FormModalLabel as Label,
   FormModalInput as Input,
+  FormModalPasswordInput as PasswordInput,
   FormModalTextarea as Textarea,
   FormModalButtonWrapper as ButtonWrapper,
   FormModalSubmitButton as SubmitButton,

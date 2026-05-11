@@ -10,6 +10,7 @@ import {
   Form,
   Input,
   Label,
+  PasswordInput,
   Row,
   StatusArea,
   SubmitButton,
@@ -89,9 +90,8 @@ function AuthModal({ onClose }) {
 
           <Row>
             <Label htmlFor={passwordInputId}>密码</Label>
-            <Input
+            <PasswordInput
               id={passwordInputId}
-              type="password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               required

@@ -15,7 +15,7 @@ import { useAuth } from "../../hooks/useAuth";
 import AuthModal from "../AuthModal";
 import Button from "../Button";
 
-function SettingsPage() {
+function SettingsPage({ resetAnswerToast }) {
   const { phraseSets, status } = usePhraseSets();
   const [selectedSetIds, setSelectedSetIds] = React.useState([]);
   const { katakanaRate, setKatakanaRate } =
@@ -53,6 +53,7 @@ function SettingsPage() {
       }
 
       storeSharedDictSetIds(nextSetIds);
+      resetAnswerToast();
       return nextSetIds;
     });
   }
@@ -204,7 +205,7 @@ const PhraseSetsLoadingWrapper = styled.div`
 const SelectableCard = styled(PhraseSetCard)`
   width: 100%;
   height: 112px;
-  font-size: 0.95rem;
+  font-size: ${FONT_SIZE.small};
   transition: box-shadow 120ms ease, opacity 120ms ease;
 
   &[data-selected="true"] {
