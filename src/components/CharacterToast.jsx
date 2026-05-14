@@ -1,6 +1,13 @@
 import React from "react";
 import styled from "styled-components";
-import { SABER, RIN, DEFAULT, FONT_FAMILY, FONT_SIZE } from "../constants";
+import {
+  SABER,
+  RIN,
+  DEFAULT,
+  FONT_FAMILY,
+  FONT_SIZE,
+  QUERIES,
+} from "../constants";
 
 const GOOD_HINT_1 = [
   "すげぇー！",
@@ -112,7 +119,7 @@ export function CharacterToastOverlay({ answerToast, position = "fixed" }) {
 
 const Wrapper = styled.div`
   width: 100%;
-  height: 6rem;
+  height: 4rem;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -130,6 +137,12 @@ const Wrapper = styled.div`
       p.$phase === "exiting" ? "toast-disappear" : "toast-appear"}
     ${(p) => (p.$phase === "exiting" ? "420ms" : "160ms")} ease-out both;
 
+  @media ${QUERIES.tabletAndUp} {
+    height: 5rem;
+  }
+  @media ${QUERIES.laptopAndUp} {
+    height: 6rem;
+  }
   @keyframes toast-appear {
     from {
       opacity: 0;

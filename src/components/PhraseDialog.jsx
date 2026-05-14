@@ -44,36 +44,43 @@ function PhraseDialog({
     setStatus("busy");
 
     const base = `https://baedcqmxejvjzyvynqrp.supabase.co/functions/v1/tatoeba-proxy`;
-    const encodedQuery = encodeURIComponent("=" + phrase.word);
+    const encodedQuery = encodeURIComponent(phrase.word);
 
     Promise.all([
       fetch(`${base}?query=${encodedQuery}&trans_to=cmn`).then((r) => r.json()),
-      fetch(`${base}?query=${encodedQuery}&trans_to=eng`).then((r) => r.json()),
+      fetch(`${base}?query=${encodedQuery}`).then((r) => r.json()),
     ])
-      .then(([cmnData, engData]) => {
-        const parse = (data, lang) =>
-          (data.results ?? [])
-            .filter((item) => item.text.includes(phrase.word)) // 过滤掉不含这个词的句子
-            .map((item) => {
-              const trans = item.translations
-                .flat()
-                .find((t) => t.lang === lang);
-              return {
-                sentence: item.text,
-                translation: trans ? trans.text : null,
-              };
-            });
+      .then(([cmnData, allData]) => {
+        const cmnResults = (cmnData.results ?? [])
+          .filter((item) => item.text.length <= 80)
+          .filter((item) => item.text.includes(phrase.word))
+          .map((item) => {
+            const trans = item.translations
+              .flat()
+              .find((t) => t.lang === "cmn");
+            return {
+              sentence: item.text,
+              translation: trans?.text ?? "（无翻译）",
+            };
+          });
 
-        const cmnResults = parse(cmnData, "cmn");
-        const engResults = parse(engData, "eng");
-
-        // 中文在前，英文在后，去掉重复的句子
         const seenSentences = new Set(cmnResults.map((r) => r.sentence));
-        const dedupedEng = engResults.filter(
-          (r) => !seenSentences.has(r.sentence)
-        );
 
-        setExamples([...cmnResults, ...dedupedEng]);
+        const restResults = (allData.results ?? [])
+          .filter((item) => item.text.length <= 80)
+          .filter((item) => item.text.includes(phrase.word))
+          .filter((item) => !seenSentences.has(item.text))
+          .map((item) => {
+            const engTrans = item.translations
+              .flat()
+              .find((t) => t.lang === "eng");
+            return {
+              sentence: item.text,
+              translation: engTrans?.text ?? "（无翻译）",
+            };
+          });
+
+        setExamples([...cmnResults, ...restResults]);
         setStatus("free");
       })
       .catch(() => setStatus("free"));
