@@ -87,7 +87,7 @@ function App() {
 
   return (
     <KatakanaRateContext.Provider value={{ katakanaRate, setKatakanaRate }}>
-      <BrowserRouter basename="/HappyJPGrammar/">
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Root>
           <Header />
           <CharacterToastOverlay answerToast={answerToast} />

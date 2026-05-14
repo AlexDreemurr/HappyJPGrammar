@@ -7,7 +7,7 @@ function StartPage() {
   return (
     <Wrapper>
       <ImgWrapper>
-        <Img src="/HappyJPGrammar/study_nihongo.png" />
+        <Img src={`${import.meta.env.BASE_URL}study_nihongo.png`} />
       </ImgWrapper>
       <LinkGroup>
         <LinkWrapper to="/quiz/grammar" style={{ textDecoration: "none" }}>
